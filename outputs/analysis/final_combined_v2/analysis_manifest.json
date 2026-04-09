@@ -1,11 +1,9 @@
 {
   "source_result_paths": [
-    "outputs/runs/qwen2.5_7b_instruct_eval_locked_v1.jsonl",
     "outputs/runs/qwen2.5_0.5b_instruct_eval_v2.jsonl"
   ],
   "model_names": [
-    "qwen2.5:0.5b-instruct",
-    "qwen2.5:7b-instruct"
+    "qwen2.5:0.5b-instruct"
   ],
   "split_values": [
     "eval"

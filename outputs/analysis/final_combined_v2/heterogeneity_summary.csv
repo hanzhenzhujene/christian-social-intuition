@@ -1,14 +1,4 @@
 model,primary_tension_tag,contrast,metric,n_items,estimate,ci_low,ci_high
-qwen2.5:7b-instruct,motive_vs_outcome,pre_heart_shift,Christian minus secular pre on J1 heart shift,29,0.034482758620689655,0.0,0.13793103448275862
-qwen2.5:7b-instruct,motive_vs_outcome,post_controlled_explanation,Christian minus secular post on controlled explanation semantic score,29,0.034482758620689655,-0.0698275862068965,0.13793103448275862
-qwen2.5:7b-instruct,appearance_vs_intention,pre_heart_shift,Christian minus secular pre on J1 heart shift,28,0.0,0.0,0.0
-qwen2.5:7b-instruct,appearance_vs_intention,post_controlled_explanation,Christian minus secular post on controlled explanation semantic score,28,-0.10714285714285714,-0.25,0.03571428571428571
-qwen2.5:7b-instruct,good_act_bad_motive,pre_heart_shift,Christian minus secular pre on J1 heart shift,18,0.05555555555555555,0.0,0.16666666666666666
-qwen2.5:7b-instruct,good_act_bad_motive,post_controlled_explanation,Christian minus secular post on controlled explanation semantic score,18,0.0,0.0,0.0
-qwen2.5:7b-instruct,bad_act_good_motive,pre_heart_shift,Christian minus secular pre on J1 heart shift,18,0.0,0.0,0.0
-qwen2.5:7b-instruct,bad_act_good_motive,post_controlled_explanation,Christian minus secular post on controlled explanation semantic score,18,-0.16666666666666666,-0.5555555555555556,0.05694444444444318
-qwen2.5:7b-instruct,mixed_stakeholder_context,pre_heart_shift,Christian minus secular pre on J1 heart shift,27,0.0,0.0,0.0
-qwen2.5:7b-instruct,mixed_stakeholder_context,post_controlled_explanation,Christian minus secular post on controlled explanation semantic score,27,-0.037037037037037035,-0.18518518518518517,0.1111111111111111
 qwen2.5:0.5b-instruct,motive_vs_outcome,pre_heart_shift,Christian minus secular pre on J1 heart shift,29,0.0,0.0,0.0
 qwen2.5:0.5b-instruct,motive_vs_outcome,post_controlled_explanation,Christian minus secular post on controlled explanation semantic score,29,0.034482758620689655,0.0,0.13793103448275862
 qwen2.5:0.5b-instruct,appearance_vs_intention,pre_heart_shift,Christian minus secular pre on J1 heart shift,28,-0.03571428571428571,-0.10714285714285714,0.0

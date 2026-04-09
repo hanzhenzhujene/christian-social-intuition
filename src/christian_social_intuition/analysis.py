@@ -106,8 +106,22 @@ def _model_label(model: str) -> str:
 def _style_axis(ax: plt.Axes, *, grid_axis: str = "y") -> None:
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
+    ax.spines["left"].set_color("#C8CDD3")
+    ax.spines["bottom"].set_color("#C8CDD3")
     ax.grid(axis=grid_axis, color="#D9D9D9", linewidth=0.8, alpha=0.85)
     ax.set_axisbelow(True)
+    ax.set_facecolor("#FFFFFF")
+
+
+def _add_pre_post_bands(ax: plt.Axes, *, pre: tuple[float, float], post: tuple[float, float]) -> None:
+    ax.axhspan(pre[0], pre[1], color="#F4F8FC", alpha=0.95, zorder=0)
+    ax.axhspan(post[0], post[1], color="#FFF6EE", alpha=0.95, zorder=0)
+
+
+def _format_pct_text(value: float) -> str:
+    if pd.isna(value):
+        return "n/a"
+    return f"{value * 100:.1f}%"
 
 
 def _ensure_frame_columns(df: pd.DataFrame) -> pd.DataFrame:
@@ -933,37 +947,37 @@ def build_figure_notes() -> str:
             "",
             "## Figure 1: first_pass_shift.png",
             "- Data slice: `condition_summary.csv` rows for `secular_pre`, `christian_pre`, `secular_post`, `christian_post` across the two Qwen models.",
-            "- Transformation: item-level shift rates vs baseline with bootstrap confidence intervals.",
+            "- Transformation: item-level shift rates vs baseline with bootstrap confidence intervals, plotted as within-condition act-versus-heart dumbbells.",
             "- Infer: heart-level pre-framing movement is larger than act-level movement; 0.5B attenuates that pattern.",
             "- Do not infer: a significant Christian-over-secular advantage from this figure alone.",
             "",
             "## Figure 2: explanation_layer_effect.png",
             "- Data slice: `condition_summary.csv` rows for the four framed conditions across both Qwen models.",
-            "- Transformation: baseline deltas for coarse explanation focus, raw semantic score, and controlled semantic score.",
-            "- Infer: explanation outputs are prompt-sensitive relative to baseline; the controlled row is the key diagnostic layer.",
+            "- Transformation: baseline deltas for coarse explanation focus, raw semantic score, and controlled semantic score, plotted as within-timing secular-versus-Christian comparisons.",
+            "- Infer: explanation outputs are prompt-sensitive relative to baseline; the controlled row is the key diagnostic layer for checking whether anything survives lexical echo removal.",
             "- Do not infer: Christian-post exceeds secular-post after lexical control unless the direct contrast table also supports it.",
             "",
             "## Figure 3: judgment_explanation_dissociation.png",
             "- Data slice: `condition_summary.csv` rows for the four framed conditions across both Qwen models.",
-            "- Transformation: x-axis is first-pass heart shift vs baseline; y-axis is controlled semantic explanation shift vs baseline.",
+            "- Transformation: x-axis is first-pass heart shift vs baseline; y-axis is controlled semantic explanation shift vs baseline; the dashed diagonal marks equal movement in both stages.",
             "- Infer: some conditions move explanation more than first-pass judgment.",
             "- Do not infer: Christian superiority or hidden internal mechanisms.",
             "",
             "## Figure 4: j1_j2_revision.png",
             "- Data slice: `revision_summary.csv` for `baseline`, `secular_pre`, `christian_pre`, `secular_post`, and `christian_post` across both Qwen models.",
-            "- Transformation: condition-level act and heart revision rates from `J1` to `J2`.",
+            "- Transformation: condition-level act and heart revision rates from `J1` to `J2`, plotted as lollipops to emphasize small magnitudes rather than area.",
             "- Infer: revision is rare and secondary to explanation movement.",
             "- Do not infer: substantial downstream judgment rewriting.",
             "",
             "## Figure 5: cross_model_summary.png",
             "- Data slice: `direct_control_contrasts.csv` for the direct pre-framing heart contrast and direct post-framing controlled explanation contrast.",
-            "- Transformation: paired Christian-minus-secular estimates with bootstrap intervals.",
+            "- Transformation: paired Christian-minus-secular estimates with bootstrap intervals, connected across model size as a same-family slopegraph.",
             "- Infer: the smaller Qwen model attenuates the Christian-specific story.",
             "- Do not infer: scale-stable robustness of a Christian-specific mechanism.",
             "",
             "## Figure 6: heterogeneity_effects.png",
             "- Data slice: `heterogeneity_summary.csv` by `primary_tension_tag` for the two exploratory contrasts.",
-            "- Transformation: within-tag Christian-minus-secular estimates with bootstrap intervals.",
+            "- Transformation: within-tag Christian-minus-secular estimates with bootstrap intervals; labels include per-tag item counts from the locked eval split.",
             "- Infer: where motive-sensitive effects might concentrate.",
             "- Do not infer: confirmed category-level effects.",
             "",
@@ -1300,7 +1314,7 @@ def compute_mixed_effects(paired_df: pd.DataFrame) -> pd.DataFrame:
 def plot_first_pass_shift(summary_df: pd.DataFrame, output_path: str | Path) -> Path:
     plot_df = summary_df[summary_df["condition"].isin({"secular_pre", "christian_pre", "secular_post", "christian_post"})].copy()
     models = sorted(plot_df["model"].dropna().unique(), key=_model_sort_key)
-    fig, axes = plt.subplots(1, len(models), figsize=(12.8, 5.8), sharey=True)
+    fig, axes = plt.subplots(1, len(models), figsize=(12.6, 5.7), sharey=True, sharex=True)
     if len(models) == 1:
         axes = [axes]
 
@@ -1310,6 +1324,16 @@ def plot_first_pass_shift(summary_df: pd.DataFrame, output_path: str | Path) -> 
         if fallback in frame.columns and frame[fallback].notna().any():
             return pd.to_numeric(frame[fallback], errors="coerce").fillna(frame[value_col])
         return pd.to_numeric(frame[value_col], errors="coerce")
+
+    global_high = []
+    for _, row in plot_df.iterrows():
+        global_high.extend(
+            [
+                row.get("j1_act_shift_rate_ci_high", row.get("j1_act_shift_ci_high", row.get("j1_act_shift_rate", 0.0))),
+                row.get("j1_heart_shift_rate_ci_high", row.get("j1_heart_shift_ci_high", row.get("j1_heart_shift_rate", 0.0))),
+            ]
+        )
+    x_max = max(float(np.nanmax(np.array(global_high, dtype=float))), 0.02) + 0.04
 
     for ax, model in zip(axes, models, strict=True):
         model_df = plot_df[plot_df["model"] == model].copy()
@@ -1326,25 +1350,32 @@ def plot_first_pass_shift(summary_df: pd.DataFrame, output_path: str | Path) -> 
         act_err = np.vstack([np.clip(act - act_low, 0, None), np.clip(act_high - act, 0, None)])
         heart_err = np.vstack([np.clip(heart - heart_low, 0, None), np.clip(heart_high - heart, 0, None)])
 
+        _add_pre_post_bands(ax, pre=(-0.5, 1.5), post=(1.5, 3.5))
         ax.axvline(0, color="#6F6F6F", linewidth=1.0)
+        for y, x_act, x_heart in zip(ypos, act, heart, strict=True):
+            ax.plot([x_act, x_heart], [y, y], color="#BEC6D1", linewidth=2.2, zorder=1)
         ax.errorbar(
             act,
-            ypos + 0.14,
+            ypos,
             xerr=act_err,
             fmt="o",
             color=MEASURE_COLORS["act"],
-            markersize=7,
+            markeredgecolor="#2D3A4A",
+            markeredgewidth=0.8,
+            markersize=7.5,
             capsize=3,
             linewidth=1.5,
             label="J1 overall problematic",
         )
         ax.errorbar(
             heart,
-            ypos - 0.14,
+            ypos,
             xerr=heart_err,
-            fmt="o",
+            fmt="D",
             color=MEASURE_COLORS["heart"],
-            markersize=7,
+            markeredgecolor="#4A2323",
+            markeredgewidth=0.8,
+            markersize=7.2,
             capsize=3,
             linewidth=1.5,
             label="J1 heart / motive worse",
@@ -1353,27 +1384,28 @@ def plot_first_pass_shift(summary_df: pd.DataFrame, output_path: str | Path) -> 
         ax.set_yticks(ypos)
         ax.set_yticklabels([_condition_label(condition) for condition in model_df["condition"]])
         ax.invert_yaxis()
-        ax.set_xlabel("Shift vs baseline")
+        ax.set_xlabel("Items shifted vs baseline")
         ax.xaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
-        x_candidates = np.concatenate([act_high, heart_high, act, heart])
-        x_max = np.nanmax(np.append(x_candidates, 0.02))
-        ax.set_xlim(-0.01, x_max + 0.05)
+        ax.set_xlim(-0.002, x_max)
+        ax.text(0.985, 0.80, "Pre-J1\nframe", transform=ax.transAxes, ha="right", va="center", fontsize=8.5, color="#55708D")
+        ax.text(0.985, 0.23, "Post-J1\nframe", transform=ax.transAxes, ha="right", va="center", fontsize=8.5, color="#9B6A3D")
         _style_axis(ax, grid_axis="x")
 
     axes[0].set_ylabel("Condition")
     handles = [
         Line2D([0], [0], marker="o", color=MEASURE_COLORS["act"], label="J1 overall problematic", markersize=7, linestyle=""),
-        Line2D([0], [0], marker="o", color=MEASURE_COLORS["heart"], label="J1 heart / motive worse", markersize=7, linestyle=""),
+        Line2D([0], [0], marker="D", color=MEASURE_COLORS["heart"], label="J1 heart / motive worse", markersize=7, linestyle=""),
+        Line2D([0, 1], [0, 0], color="#BEC6D1", linewidth=2.2, label="Within-condition gap"),
     ]
     fig.suptitle("First-pass movement is concentrated in heart-level judgments", x=0.06, ha="left", fontweight="bold")
     fig.text(
         0.06,
         0.92,
-        "Pre-framing moves heart judgments more than act judgments, while post-framing leaves first-pass choices near zero by design.",
+        "The main visual comparison is within each condition: heart-level movement consistently exceeds act-level movement, while the smaller model attenuates the pattern.",
         fontsize=9,
         color="#4E4E4E",
     )
-    fig.legend(handles=handles, frameon=False, loc="upper center", bbox_to_anchor=(0.5, 0.03), ncol=2)
+    fig.legend(handles=handles, frameon=False, loc="upper center", bbox_to_anchor=(0.5, 0.03), ncol=3)
     fig.tight_layout()
     fig.subplots_adjust(top=0.84, bottom=0.17)
     out = Path(output_path)
@@ -1403,34 +1435,72 @@ def plot_explanation_layer_effect(summary_df: pd.DataFrame, output_path: str | P
         (raw_metric, "Raw Christian / heart-language score", MEASURE_COLORS["raw"]),
         (controlled_metric, "Lexical-controlled semantic score", MEASURE_COLORS["controlled"]),
     ]
-    fig, axes = plt.subplots(len(metrics), len(models), figsize=(12.8, 10.4), sharex=True, sharey="row")
+    fig, axes = plt.subplots(len(metrics), len(models), figsize=(12.8, 9.8), sharex="row", sharey=True)
     if len(models) == 1:
         axes = np.array([[ax] for ax in axes])
+
+    metric_limits: dict[str, tuple[float, float]] = {}
+    timing_pairs = [
+        ("Pre-J1 frame", "secular_pre", "christian_pre"),
+        ("Post-J1 frame", "secular_post", "christian_post"),
+    ]
+    for metric, _, _ in metrics:
+        vals = pd.to_numeric(plot_df[metric], errors="coerce")
+        lows = pd.to_numeric(plot_df.get(f"{metric}_ci_low", vals), errors="coerce")
+        highs = pd.to_numeric(plot_df.get(f"{metric}_ci_high", vals), errors="coerce")
+        x_min = min(float(np.nanmin(np.append(lows.to_numpy(), 0.0))), -0.01)
+        x_max = max(float(np.nanmax(np.append(highs.to_numpy(), 0.01))), 0.01)
+        pad = max(0.015, 0.08 * (x_max - x_min if x_max > x_min else 0.1))
+        metric_limits[metric] = (x_min - pad, x_max + pad)
 
     for row_idx, (metric, title, color) in enumerate(metrics):
         for col_idx, model in enumerate(models):
             ax = axes[row_idx, col_idx]
-            model_df = plot_df[plot_df["model"] == model]
-            ypos = np.arange(len(model_df))
-            values = model_df[metric].to_numpy()
-            ci_low = model_df[f"{metric}_ci_low"].fillna(model_df[metric]).to_numpy() if f"{metric}_ci_low" in model_df else values
-            ci_high = model_df[f"{metric}_ci_high"].fillna(model_df[metric]).to_numpy() if f"{metric}_ci_high" in model_df else values
-            xerr = np.vstack([np.clip(values - ci_low, 0, None), np.clip(ci_high - values, 0, None)])
+            model_df = plot_df[plot_df["model"] == model].set_index("condition")
             ax.axvline(0, color="#6F6F6F", linewidth=1.0)
-            ax.errorbar(
-                values,
-                ypos,
-                xerr=xerr,
-                fmt="o",
-                color=color,
-                ecolor=color,
-                markersize=6,
-                capsize=3,
-                linewidth=1.4,
-            )
-            ax.set_yticks(ypos)
-            ax.set_yticklabels([_condition_label(condition) for condition in model_df["condition"]])
+            _add_pre_post_bands(ax, pre=(-0.5, 0.5), post=(0.5, 1.5))
+            for y, (_, secular_condition, christian_condition) in zip([0, 1], timing_pairs, strict=True):
+                secular_row = model_df.loc[secular_condition]
+                christian_row = model_df.loc[christian_condition]
+                sec_val = float(secular_row[metric])
+                chr_val = float(christian_row[metric])
+                sec_low = float(secular_row.get(f"{metric}_ci_low", sec_val))
+                sec_high = float(secular_row.get(f"{metric}_ci_high", sec_val))
+                chr_low = float(christian_row.get(f"{metric}_ci_low", chr_val))
+                chr_high = float(christian_row.get(f"{metric}_ci_high", chr_val))
+                ax.plot([sec_val, chr_val], [y, y], color="#C5CBD4", linewidth=2.2, zorder=1)
+                ax.errorbar(
+                    sec_val,
+                    y,
+                    xerr=np.array([[max(sec_val - sec_low, 0)], [max(sec_high - sec_val, 0)]]),
+                    fmt="o",
+                    color=FRAME_COLORS["secular"],
+                    ecolor=FRAME_COLORS["secular"],
+                    markeredgecolor="#244A6A",
+                    markeredgewidth=0.8,
+                    markersize=6.8,
+                    capsize=3,
+                    linewidth=1.4,
+                    zorder=3,
+                )
+                ax.errorbar(
+                    chr_val,
+                    y,
+                    xerr=np.array([[max(chr_val - chr_low, 0)], [max(chr_high - chr_val, 0)]]),
+                    fmt="D",
+                    color=FRAME_COLORS["christian"],
+                    ecolor=FRAME_COLORS["christian"],
+                    markeredgecolor="#6C3B14",
+                    markeredgewidth=0.8,
+                    markersize=6.4,
+                    capsize=3,
+                    linewidth=1.4,
+                    zorder=3,
+                )
+            ax.set_yticks([0, 1])
+            ax.set_yticklabels([label for label, _, _ in timing_pairs])
             ax.invert_yaxis()
+            ax.set_xlim(*metric_limits[metric])
             ax.xaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
             ax.set_title(_model_label(model) if row_idx == 0 else "", fontsize=11)
             if col_idx == 0:
@@ -1439,16 +1509,22 @@ def plot_explanation_layer_effect(summary_df: pd.DataFrame, output_path: str | P
             if row_idx == len(metrics) - 1:
                 ax.set_xlabel("Change vs baseline")
 
-    fig.suptitle("Explanation outputs are prompt-sensitive, but matched-control residuals are weaker", x=0.06, ha="left", fontweight="bold")
+    handles = [
+        Line2D([0], [0], marker="o", color=FRAME_COLORS["secular"], markeredgecolor="#244A6A", label="Secular control", markersize=7, linestyle=""),
+        Line2D([0], [0], marker="D", color=FRAME_COLORS["christian"], markeredgecolor="#6C3B14", label="Christian frame", markersize=6.8, linestyle=""),
+        Line2D([0, 1], [0, 0], color="#C5CBD4", linewidth=2.2, label="Within-timing comparison"),
+    ]
+    fig.suptitle("Explanation outputs move readily, but Christian-specific residuals are not stable", x=0.06, ha="left", fontweight="bold")
     fig.text(
         0.06,
         0.95,
-        "The controlled row asks whether Christian-post still exceeds secular-post after direct frame-echo terms are removed; it should not be read as evidence of Christian superiority by itself.",
+        "Each row compares secular and Christian framing within the same timing. The controlled row is the key diagnostic layer because direct lexical echo has been removed.",
         fontsize=9,
         color="#4E4E4E",
     )
+    fig.legend(handles=handles, frameon=False, loc="upper center", bbox_to_anchor=(0.5, 0.03), ncol=3)
     fig.tight_layout()
-    fig.subplots_adjust(top=0.9)
+    fig.subplots_adjust(top=0.9, bottom=0.12)
     out = Path(output_path)
     out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out, dpi=300, bbox_inches="tight")
@@ -1464,35 +1540,49 @@ def plot_judgment_explanation_dissociation(summary_df: pd.DataFrame, output_path
         else "semantic_controlled_delta_vs_baseline"
     )
     models = sorted(plot_df["model"].dropna().unique(), key=_model_sort_key)
-    fig, axes = plt.subplots(1, len(models), figsize=(12.5, 5.6), sharex=True, sharey=True)
+    fig, axes = plt.subplots(1, len(models), figsize=(12.0, 5.8), sharex=True, sharey=True)
     if len(models) == 1:
         axes = [axes]
+    limit_min = min(float(plot_df["j1_heart_shift_rate"].min()), float(plot_df[y_metric].min()), 0.0) - 0.01
+    limit_max = max(float(plot_df["j1_heart_shift_rate"].max()), float(plot_df[y_metric].max()), 0.01) + 0.02
 
     for ax, model in zip(axes, models, strict=True):
         model_df = plot_df[plot_df["model"] == model]
         ax.axvline(0, color="#7A7A7A", linewidth=1.0)
         ax.axhline(0, color="#7A7A7A", linewidth=1.0)
+        ax.plot([limit_min, limit_max], [limit_min, limit_max], linestyle="--", color="#B0B6BE", linewidth=1.2, zorder=0)
+        ax.fill_between([limit_min, limit_max], [limit_min, limit_max], limit_max, color="#F0F7F3", alpha=0.6, zorder=0)
         for row in model_df.itertuples():
             ax.scatter(
                 row.j1_heart_shift_rate,
                 getattr(row, y_metric),
-                s=110,
+                s=125,
                 marker=_condition_marker(row.condition),
                 color=_condition_color(row.condition),
                 edgecolor="#303030",
                 linewidth=0.9,
             )
             ax.annotate(
-                _condition_label(row.condition),
+                {
+                    "secular_pre": "S-pre",
+                    "christian_pre": "C-pre",
+                    "secular_post": "S-post",
+                    "christian_post": "C-post",
+                }.get(row.condition, _condition_label(row.condition)),
                 (row.j1_heart_shift_rate, getattr(row, y_metric)),
-                xytext=(8, 8 if "christian" in row.condition else -14),
+                xytext=(8, 9 if "christian" in row.condition else -14),
                 textcoords="offset points",
                 fontsize=9,
+                bbox={"boxstyle": "round,pad=0.18", "fc": "white", "ec": "none", "alpha": 0.82},
             )
         ax.set_title(_model_label(model), fontsize=11)
         ax.set_xlabel("First-pass heart shift vs baseline")
         ax.xaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
         ax.yaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
+        ax.set_xlim(limit_min, limit_max)
+        ax.set_ylim(limit_min, limit_max)
+        ax.set_aspect("equal", adjustable="box")
+        ax.text(0.04, 0.93, "Explanation > J1", transform=ax.transAxes, fontsize=8.5, color="#48745D")
         _style_axis(ax, grid_axis="both")
 
     axes[0].set_ylabel("Lexical-controlled explanation shift vs baseline")
@@ -1506,7 +1596,7 @@ def plot_judgment_explanation_dissociation(summary_df: pd.DataFrame, output_path
     fig.text(
         0.06,
         0.92,
-        "Upper-left points indicate explanation-layer movement with little first-pass judgment movement, which is the key stage-dissociation pattern.",
+        "The dashed diagonal marks equal movement in the two stages. Points above that line indicate stronger explanation movement than first-pass heart movement.",
         fontsize=9,
         color="#4E4E4E",
     )
@@ -1523,10 +1613,11 @@ def plot_judgment_explanation_dissociation(summary_df: pd.DataFrame, output_path
 def plot_revision_figure(revision_df: pd.DataFrame, output_path: str | Path) -> Path:
     plot_df = revision_df[revision_df["condition"].isin(CONDITION_ORDER)].copy()
     models = sorted(plot_df["model"].dropna().unique(), key=_model_sort_key)
-    fig, axes = plt.subplots(2, len(models), figsize=(12.8, 8.2), sharex=True, sharey="row")
+    fig, axes = plt.subplots(2, len(models), figsize=(12.8, 7.6), sharex=True, sharey="row")
     if len(models) == 1:
         axes = np.array([[axes[0]], [axes[1]]])
     metrics = [("j2_act_revision_rate", "Act revision rate"), ("j2_heart_revision_rate", "Heart revision rate")]
+    x_max = max(float(plot_df["j2_act_revision_rate"].max()), float(plot_df["j2_heart_revision_rate"].max()), 0.01) + 0.03
 
     for row_idx, (metric, title) in enumerate(metrics):
         for col_idx, model in enumerate(models):
@@ -1535,28 +1626,37 @@ def plot_revision_figure(revision_df: pd.DataFrame, output_path: str | Path) -> 
             model_df["order"] = model_df["condition"].map(_condition_sort_key)
             model_df = model_df.sort_values("order")
             positions = np.arange(len(model_df))
-            bars = ax.bar(
-                positions,
-                model_df[metric],
-                color=[_condition_color(condition) for condition in model_df["condition"]],
-                edgecolor="#404040",
-                linewidth=0.8,
-            )
-            for condition, bar in zip(model_df["condition"], bars, strict=True):
-                bar.set_hatch(_condition_hatch(condition))
+            _add_pre_post_bands(ax, pre=(0.5, 2.5), post=(2.5, 4.5))
+            for y, row in zip(positions, model_df.itertuples(), strict=True):
+                value = float(getattr(row, metric))
+                ax.hlines(y, 0, value, color="#C8CED6", linewidth=2.0, zorder=1)
+                ax.scatter(
+                    value,
+                    y,
+                    s=70,
+                    marker="s" if row.condition.endswith("post") else "o",
+                    color=_condition_color(row.condition),
+                    edgecolor="#404040",
+                    linewidth=0.8,
+                    zorder=3,
+                )
+                ax.text(value + x_max * 0.02, y, _format_pct_text(value), va="center", ha="left", fontsize=8.5, color="#4E4E4E")
             ax.set_title(_model_label(model) if row_idx == 0 else "", fontsize=11)
             ax.set_ylabel(title)
-            ax.set_xticks(positions)
-            ax.set_xticklabels([_condition_label(condition) for condition in model_df["condition"]], rotation=20, ha="right")
-            ax.yaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
-            ax.set_ylim(0, max(float(plot_df[metric].max()), 0.05) + 0.08)
-            _style_axis(ax, grid_axis="y")
+            ax.set_yticks(positions)
+            ax.set_yticklabels([_condition_label(condition) for condition in model_df["condition"]])
+            ax.invert_yaxis()
+            ax.xaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
+            ax.set_xlim(0, x_max)
+            if row_idx == len(metrics) - 1:
+                ax.set_xlabel("Revision rate")
+            _style_axis(ax, grid_axis="x")
 
     fig.suptitle("J1-to-J2 revision is rare and remains a secondary mechanism check", x=0.06, ha="left", fontweight="bold")
     fig.text(
         0.06,
         0.93,
-        "These panels ask whether post-framing changes re-judgment behavior after explanation, rather than only reshaping post-hoc explanation.",
+        "The plot is designed to show scarcity rather than volume: most revision rates stay close to zero even when explanation language moves.",
         fontsize=9,
         color="#4E4E4E",
     )
@@ -1576,9 +1676,16 @@ def plot_heterogeneity(heterogeneity_df: pd.DataFrame, output_path: str | Path) 
         ("pre_heart_shift", "Christian - secular pre on J1 heart shift"),
         ("post_controlled_explanation", "Christian - secular post on controlled explanation shift"),
     ]
-    fig, axes = plt.subplots(1, 2, figsize=(13.2, 5.8), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=(13.2, 5.9), sharey=True)
     model_colors = {"qwen2.5:7b-instruct": "#B04A5A", "qwen2.5:0.5b-instruct": "#4C78A8"}
     model_markers = {"qwen2.5:7b-instruct": "o", "qwen2.5:0.5b-instruct": "s"}
+    counts = heterogeneity_df.groupby("primary_tension_tag")["n_items"].max().to_dict()
+    labels = [f"{tag.replace('_', ' ')} (n={int(counts.get(tag, 0))})" for tag in TENSION_TAGS]
+    limit = max(
+        float(np.abs(heterogeneity_df["ci_low"]).max()),
+        float(np.abs(heterogeneity_df["ci_high"]).max()),
+        0.05,
+    ) + 0.03
     for ax, (contrast, title) in zip(axes, metrics, strict=True):
         subset = heterogeneity_df[heterogeneity_df["contrast"] == contrast].copy()
         subset["tag_order"] = subset["primary_tension_tag"].map({tag: idx for idx, tag in enumerate(TENSION_TAGS)})
@@ -1594,15 +1701,17 @@ def plot_heterogeneity(heterogeneity_df: pd.DataFrame, output_path: str | Path) 
                 xerr=[[max(row.estimate - row.ci_low, 0)], [max(row.ci_high - row.estimate, 0)]],
                 fmt=model_markers.get(row.model, "o"),
                 color=model_colors.get(row.model, "#4E4E4E"),
+                ecolor=model_colors.get(row.model, "#4E4E4E"),
                 markersize=6.5,
                 capsize=3,
                 linewidth=1.4,
             )
         ax.set_title(title, fontsize=11)
         ax.set_yticks(np.arange(len(TENSION_TAGS)))
-        ax.set_yticklabels([tag.replace("_", " ") for tag in TENSION_TAGS])
+        ax.set_yticklabels(labels)
         ax.xaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
         ax.set_xlabel("Direct Christian - secular estimate")
+        ax.set_xlim(-limit, limit)
         _style_axis(ax, grid_axis="x")
     axes[0].set_ylabel("Item category")
     handles = [
@@ -1651,42 +1760,51 @@ def plot_cross_model_comparison(direct_contrasts_df: pd.DataFrame, output_path: 
         }
     )
     panels = ["A. Direct pre-framing heart contrast", "B. Direct post-framing controlled explanation contrast"]
-    fig, axes = plt.subplots(1, 2, figsize=(12.2, 5.2), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=(11.4, 5.2), sharey=True)
+    y_limit = max(float(np.abs(plot_df["ci_low"]).max()), float(np.abs(plot_df["ci_high"]).max()), 0.05) + 0.02
     for ax, panel in zip(axes, panels, strict=True):
         subset = plot_df[plot_df["panel"] == panel].copy()
         subset = subset.sort_values("model", key=lambda s: s.map(_model_sort_key))
-        ypos = np.arange(len(subset))
-        ax.axvline(0, color="#7A7A7A", linewidth=1.0)
-        colors = [FRAME_COLORS["christian"] if "heart" in contrast else MEASURE_COLORS["controlled"] for contrast in subset["contrast"]]
+        x = np.arange(len(subset))
+        color = FRAME_COLORS["christian"] if "heart" in subset["contrast"].iloc[0] else MEASURE_COLORS["controlled"]
+        ax.axhline(0, color="#7A7A7A", linewidth=1.0)
+        ax.plot(x, subset["estimate"], color=color, linewidth=2.2, zorder=1)
         ax.errorbar(
+            x,
             subset["estimate"],
-            ypos,
-            xerr=np.vstack(
+            yerr=np.vstack(
                 [
                     np.clip(subset["estimate"] - subset["ci_low"], 0, None),
                     np.clip(subset["ci_high"] - subset["estimate"], 0, None),
                 ]
             ),
             fmt="o",
-            color="#303030",
-            ecolor="#303030",
-            markersize=0,
+            color=color,
+            ecolor=color,
+            markeredgecolor="#303030",
+            markeredgewidth=0.8,
+            markersize=7.5,
+            capsize=3,
+            linewidth=1.4,
+            zorder=3,
         )
-        for row, y, color in zip(subset.itertuples(), ypos, colors, strict=True):
-            ax.scatter(row.estimate, y, s=90, color=color, edgecolor="#303030", linewidth=0.8, zorder=3)
-            ax.text(row.estimate + 0.004, y, f"{row.estimate:+.1%}", va="center", ha="left", fontsize=9)
+        for xi, row in zip(x, subset.itertuples(), strict=True):
+            va = "bottom" if row.estimate >= 0 else "top"
+            offset = 0.012 if row.estimate >= 0 else -0.014
+            ax.text(xi, row.estimate + offset, f"{row.estimate:+.1%}", va=va, ha="center", fontsize=9, color="#333333")
         ax.set_title(panel, fontsize=11)
-        ax.set_yticks(ypos)
-        ax.set_yticklabels([_model_label(model) for model in subset["model"]])
-        ax.xaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
-        ax.set_xlabel("Christian - secular paired estimate")
-        _style_axis(ax, grid_axis="x")
-    axes[0].set_ylabel("Model")
-    fig.suptitle("Same-family scale comparison shows attenuation rather than stronger Christian-specific effects", x=0.06, ha="left", fontweight="bold")
+        ax.set_xticks(x)
+        ax.set_xticklabels([_model_label(model).replace("Qwen 2.5 ", "") for model in subset["model"]])
+        ax.yaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
+        ax.set_ylim(-y_limit, y_limit)
+        ax.set_xlabel("Model size")
+        _style_axis(ax, grid_axis="y")
+    axes[0].set_ylabel("Christian - secular paired estimate")
+    fig.suptitle("Same-family scale comparison shows attenuation rather than robustness success", x=0.06, ha="left", fontweight="bold")
     fig.text(
         0.06,
         0.92,
-        "The figure summarizes the two most diagnostic matched-control contrasts: first-pass heart movement and controlled explanation movement across Qwen model sizes.",
+        "Each panel connects the same contrast across Qwen sizes, making attenuation or sign instability visible at a glance.",
         fontsize=9,
         color="#4E4E4E",
     )

@@ -261,7 +261,7 @@ The same-family smaller model attenuates this story rather than strengthening it
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.98\linewidth]{figures/first_pass_shift.png}
-\caption{First-pass shift rates by condition and model size. Heart-level pre-framing movement is visibly larger than act-level movement, while the smaller Qwen model attenuates the pattern. The figure supports a stage-dissociation argument, not a claim of strong Christian superiority.}
+\caption{First-pass shift rates by condition and model size. Within each condition, the connected markers compare act-level and heart-level movement directly; heart-level pre-framing movement is visibly larger, while the smaller Qwen model attenuates the pattern. The figure supports a stage-dissociation argument, not a claim of strong Christian superiority.}
 \label{fig:first-pass}
 \end{figure}
 
@@ -276,7 +276,7 @@ Relative to baseline, the 7B raw explanation score rises by +15.83 points under 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.98\linewidth]{figures/explanation_layer_effect.png}
-\caption{Explanation-layer baseline deltas by model. The key diagnostic question is whether \texttt{christian\_post} exceeds the matched secular post-frame after lexical echo is removed. In the completed runs, explanation is prompt-sensitive relative to baseline, but the direct Christian-versus-secular residual is weak and unstable rather than robustly positive.}
+\caption{Explanation-layer baseline deltas by model. Each row compares Christian and secular framing within the same timing, so the key diagnostic question is whether \texttt{christian\_post} exceeds the matched secular post-frame after lexical echo is removed. In the completed runs, explanation is prompt-sensitive relative to baseline, but the direct Christian-versus-secular residual is weak and unstable rather than robustly positive.}
 \label{fig:explanation-layer}
 \end{figure}
 
@@ -306,7 +306,7 @@ In 0.5B, act revision is zero in every condition and heart revision is only 0.83
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.98\linewidth]{figures/j1_j2_revision.png}
-\caption{Revision rates from \texttt{J1} to \texttt{J2}. Revision is rare in both models and is used here as a secondary mechanism check. The figure matters because explanation can move while both first-pass and re-judged exposed choices remain largely stable.}
+\caption{Revision rates from \texttt{J1} to \texttt{J2}. The lollipop encoding is intended to emphasize rarity rather than area: revision is rare in both models and is used here as a secondary mechanism check. The figure matters because explanation can move while both first-pass and re-judged exposed choices remain largely stable.}
 \label{fig:revision}
 \end{figure}
 
@@ -319,7 +319,7 @@ The answer is partial at best. The 7B model shows a modest Christian-over-secula
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.98\linewidth]{figures/cross_model_summary.png}
-\caption{Same-family scale comparison of the two most diagnostic matched-control contrasts. The modest 7B pre-heart increment attenuates in the smaller Qwen model, and the controlled explanation contrast does not form a stable Christian-specific pattern at either size.}
+\caption{Same-family scale comparison of the two most diagnostic matched-control contrasts. The connected points track the same contrast across model size, making attenuation easy to see: the modest 7B pre-heart increment weakens in the smaller Qwen model, and the controlled explanation contrast does not form a stable Christian-specific pattern at either size.}
 \label{fig:model-comparison}
 \end{figure}
 
@@ -330,7 +330,7 @@ The heterogeneity analysis is exploratory and should not be read as a confirmato
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.98\linewidth]{figures/heterogeneity_effects.png}
-\caption{Exploratory heterogeneity by item type. This figure is used to probe where motive-sensitive effects may concentrate, not to claim confirmed category-level effects. The scale comparison again looks more like attenuation and instability than robustness success.}
+\caption{Exploratory heterogeneity by item type. Labels include per-category item counts from the locked eval split, and the figure is used only to probe where motive-sensitive effects may concentrate, not to claim confirmed category-level effects. The scale comparison again looks more like attenuation and instability than robustness success.}
 \label{fig:heterogeneity}
 \end{figure}
 
