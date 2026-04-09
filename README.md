@@ -1,97 +1,108 @@
-![Project overview figure](paper/figures/study_overview_main.png)
-
 # Christian Framing × the Social Intuitionist Model for LLMs
 
-This repository asks a narrower and more useful question than most moral-prompting papers:
+> A stage-separated benchmark for testing whether prompting changes an LLM's **first-pass exposed moral judgment** or mainly its **post-hoc explanation**.
 
-**When a moral frame changes an LLM's output, does it change the model's first-pass exposed judgment, or mostly the explanation it gives afterward?**
+[Paper (PDF)](paper/main.pdf) · [Canonical LaTeX](paper/main.tex) · [Qwen 7B analysis](outputs/analysis/qwen2.5_7b_instruct_eval_v2/analysis_report.md) · [Qwen 0.5B analysis](outputs/analysis/qwen2.5_0.5b_instruct_eval_v2/analysis_report.md)
 
-To answer that, the project turns everyday **Moral Stories** scenarios into staged moral evaluations with three explicit steps:
+![Study overview](paper/figures/study_overview_main.png)
+
+## Overview
+
+Most moral-prompting studies in LLMs evaluate a single bundled answer: judgment plus rationale. That setup is useful for benchmarking, but it makes one central identification problem hard to see:
+
+**Did the prompt change the model's judgment, or did it mostly change how the model explained that judgment?**
+
+This repository is built to answer that question directly. We convert everyday **Moral Stories** scenarios into a staged protocol:
 
 - `J1`: first-pass forced-choice judgment
-- `E`: post-hoc explanation tied to `J1`
+- `E`: explanation explicitly tied to `J1`
 - `J2`: re-judgment after explanation
 
-The result is a mechanism-oriented benchmark for testing whether prompt effects are really judgment effects, explanation effects, or both.
+The framing manipulation is intentionally narrow:
 
-## Why This Repo Exists
+- a **Christian heart-focused frame**
+- a **matched secular motive-focused control**
 
-Most prompt-effect studies in LLM morality treat judgment and explanation as a single bundled response. That makes strong claims easy to overstate.
+The goal is not to ask whether Christian prompting is “better.” The goal is to separate:
 
-This project is designed to make that mistake harder.
+- prompt effects on **first-pass exposed judgment**
+- prompt effects on **post-hoc explanation**
+- prompt effects that survive a **matched secular control**
+- prompt effects that survive **lexical-echo control**
 
-It gives you a reproducible way to:
+## Main Empirical Takeaway
 
-- separate **first-pass exposed judgment** from **post-hoc explanation**
-- compare a **Christian heart-focused frame** against a **matched secular motive-focused control**
-- test whether explanation movement survives **lexical-echo control**
-- inspect whether explanation changes actually propagate into `J2`
+The strongest evidence in this project is a **mechanism distinction**, not a robust Christian-specific advantage claim.
 
-If you care about prompt interpretability, value framing, or benchmark design, this is the practical use case:
-**do not assume that a changed explanation means a changed judgment.**
+1. **Explanation is more prompt-sensitive than first-pass judgment relative to baseline.** In the main 7B run, Christian pre-framing changes `J1 heart` on `9.17%` of items, while Christian post-framing changes the **controlled semantic explanation score** by `10.0%` relative to baseline.
+2. **The direct Christian-over-secular first-pass effect is modest.** On `qwen2.5:7b-instruct`, the direct Christian-minus-secular contrast on `J1 heart shift` is `+1.67 pp` with `95% CI [+0.00, +4.17]`. Act-level first-pass movement stays near zero.
+3. **The Christian-specific explanation story weakens under stricter comparison.** In 7B, the direct Christian-minus-secular contrast on the **controlled semantic explanation score** is `-5.00 pp` with `95% CI [-13.33, +1.67]`. In `qwen2.5:0.5b-instruct`, the corresponding residual is only `+2.50 pp` with `95% CI [-0.83, +6.67]`.
+4. **Re-judgment barely moves.** `J1 → J2` revision is rare in both models, which supports a stage-dissociation reading more than a downstream judgment-rewrite story.
 
-## Main Takeaway
+![README results summary](paper/figures/readme_results_summary.png)
 
-The current evidence supports a cleaner claim than the early version of the project did:
+**How to read the figure**
 
-- **Explanation language is more prompt-sensitive than first-pass exposed judgment relative to baseline.**
-- On `qwen2.5:7b-instruct`, the direct Christian-over-secular first-pass heart contrast is **modest**: `+1.67` percentage points (`95% CI: [+0.00, +4.17]`).
-- First-pass act-level movement stays near zero.
-- Once the comparison is made against a **matched secular motive-focused control** and explanation text is evaluated with **lexical-echo control**, the Christian-specific explanation advantage weakens or disappears.
-- The smaller same-family model, `qwen2.5:0.5b-instruct`, **attenuates rather than strengthens** the Christian-specific story.
-- `J1 -> J2` revision is rare, which supports a **stage dissociation** reading more than a downstream judgment-rewrite story.
+- Left panel: relative to baseline, explanation movement is larger than first-pass act movement, and often comparable to or larger than first-pass heart movement.
+- Right panel: once the comparison is made directly against the matched secular motive-focused control, the Christian-specific residual is modest at `J1` and weak or unstable at the explanation layer.
+- Bottom line: this repository supports a **stage dissociation** claim more strongly than a strong **Christian-specific advantage** claim.
 
-### Compact Result Snapshot
+## Why This Matters
 
-| Contrast | `qwen2.5:7b-instruct` | `qwen2.5:0.5b-instruct` | Interpretation |
-| --- | --- | --- | --- |
-| `christian_pre - secular_pre` on `J1 heart shift` | `+1.67 pp` `[-0.00, +4.17]` | `-0.83 pp` `[-2.50, +0.00]` | Modest at 7B, absent at 0.5B |
-| `christian_pre - secular_pre` on `J1 act shift` | `-0.83 pp` `[-2.50, +0.00]` | `+0.00 pp` `[+0.00, +0.00]` | Act movement stays near zero |
-| `christian_post - secular_post` on raw explanation score | `-1.67 pp` `[-15.83, +11.67]` | `-4.17 pp` `[-20.83, +10.00]` | No stable Christian-specific raw explanation gain |
-| `christian_post - secular_post` on controlled semantic explanation score | `-5.00 pp` `[-13.33, +1.67]` | `+2.50 pp` `[-0.83, +6.67]` | Weak, unstable after lexical control |
-| `christian_post - secular_post` on `J1 -> J2 heart revision` | `-1.67 pp` `[-4.17, +0.00]` | `+0.00 pp` `[+0.00, +0.00]` | Post-framing does not create strong revision pressure |
+This project is useful even if you do not care about Christian framing per se.
 
-Full paper-facing tables live in:
+It gives you a reusable experimental pattern for prompt-effect studies in which the usual “single answer” evaluation is too blunt. In particular, it helps you avoid a common mistake:
 
-- [`outputs/analysis/final_combined_v2/main_text_direct_contrasts.csv`](outputs/analysis/final_combined_v2/main_text_direct_contrasts.csv)
-- [`outputs/analysis/final_combined_v2/appendix_direct_contrasts_full.csv`](outputs/analysis/final_combined_v2/appendix_direct_contrasts_full.csv)
+**do not infer judgment change from explanation change alone.**
 
-![Cross-model summary of the main direct contrasts](paper/figures/cross_model_summary.png)
+That matters for work on:
 
-## What This Project Contributes
+- value framing
+- persona prompting
+- safety and alignment prompting
+- politically or religiously loaded prompting
+- legal and normative prompting
 
-This repo is most useful as a research instrument, not just a paper artifact.
+## What This Repository Contributes
 
-It gives you:
+- A stage-separated moral-evaluation benchmark built from **everyday Moral Stories scenarios**, not only trolley-style dilemmas.
+- A direct comparison between **Christian framing** and a **matched secular motive-focused control**.
+- Explanation analysis that distinguishes:
+  - **lexical echo**
+  - **raw semantic explanation score**
+  - **controlled semantic explanation score**
+- A same-family scale comparison:
+  - `qwen2.5:7b-instruct`
+  - `qwen2.5:0.5b-instruct`
+- Paper-ready artifacts:
+  - figures
+  - direct-contrast tables
+  - qualitative examples
+  - appendix materials
+  - reproducibility manifests
 
-- a staged moral-evaluation pipeline anchored to **everyday scenarios**, not trolley-style edge cases
-- a direct test of **generic motive salience** versus **Christian-specific framing**
-- an explanation analysis that distinguishes **lexical echo** from a **controlled semantic explanation score**
-- a same-family scale comparison inside Qwen, which is easier to interpret than an architecture-mixing robustness section
-- paper-ready figures, tables, appendix materials, and reproducibility manifests
-
-## Repository Tour
+## Repository Structure
 
 - `src/christian_social_intuition/`
-  Core code for data building, staged prompting, experiment execution, parsing, and analysis.
+  Core code for item construction, staged prompting, experiment execution, parsing, and analysis.
 - `configs/frames.yaml`
-  Selected Christian and secular frame variants, plus lexicons for lexical echo and controlled semantic scoring.
+  Frame text plus the lexicons used for lexical-echo and controlled-semantic scoring.
 - `configs/experiment.yaml`
-  Default experiment settings and run presets.
-- `data/`
-  Source download location plus processed item pools, review sheets, and locked splits.
-- `outputs/runs/`
-  Raw staged model responses and run manifests.
-- `outputs/analysis/`
-  Final tables, figures, qualitative examples, and paper-facing summaries.
+  Default run settings and presets.
+- `data/processed/`
+  Candidate pool, locked dev/eval splits, and item review sheet.
+- `outputs/analysis/qwen2.5_7b_instruct_eval_v2/`
+  Main-model analysis bundle.
+- `outputs/analysis/qwen2.5_0.5b_instruct_eval_v2/`
+  Smaller-model comparison bundle.
 - `paper/`
-  Canonical LaTeX manuscript and compiled PDF.
+  Canonical manuscript, figures, and compiled PDF.
 - `docs/final_revision/`
-  Final calibration materials: appendix draft, stats tables, reviewer-risk memo, safe claims, and avoid-claims notes.
+  Final-calibration appendix, tables, reviewer-risk memo, and claim-boundary notes.
 
-## Quickstart
+## Reproducing the Main Results
 
-### 1. Install
+### Install
 
 ```bash
 python -m venv .venv
@@ -99,7 +110,7 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-### 2. Build the item pool
+### Build the benchmark
 
 ```bash
 PYTHONPATH=src python -m christian_social_intuition.cli fetch-moral-stories
@@ -107,7 +118,7 @@ PYTHONPATH=src python -m christian_social_intuition.cli build-items
 PYTHONPATH=src python -m christian_social_intuition.cli apply-item-review
 ```
 
-### 3. Run the staged experiment
+### Run the staged experiment
 
 ```bash
 PYTHONPATH=src python -m christian_social_intuition.cli run-experiment \
@@ -117,117 +128,74 @@ PYTHONPATH=src python -m christian_social_intuition.cli run-experiment \
   --run-id selected_v2
 ```
 
-### 4. Analyze the results
+### Analyze the run
 
 ```bash
 PYTHONPATH=src python -m christian_social_intuition.cli analyze-results \
-  --results outputs/runs/qwen2.5_7b_instruct_eval_v2.jsonl \
-  --results outputs/runs/qwen2.5_0.5b_instruct_eval_v2.jsonl \
+  --results outputs/runs/qwen2.5_7b_instruct_eval_locked_v1.jsonl \
   --frames-path configs/frames.yaml \
-  --output-dir outputs/analysis/final_combined_v2
+  --output-dir outputs/analysis/qwen2.5_7b_instruct_eval_v2
 ```
 
-## Reproduce the Paper
+For the smaller-model comparison, replace the model and result path with:
 
-### Main manuscript
+- `qwen2.5:0.5b-instruct`
+- `outputs/runs/qwen2.5_0.5b_instruct_eval_v2.jsonl`
 
-- Canonical source: [`paper/main.tex`](paper/main.tex)
-- Compiled PDF: [`paper/main.pdf`](paper/main.pdf)
+## Key Artifacts
+
+### Paper
+
+- [Main PDF](paper/main.pdf)
+- [LaTeX source](paper/main.tex)
+
+### Model-specific analysis
+
+- [Qwen 7B report](outputs/analysis/qwen2.5_7b_instruct_eval_v2/analysis_report.md)
+- [Qwen 7B direct contrasts](outputs/analysis/qwen2.5_7b_instruct_eval_v2/main_text_direct_contrasts.csv)
+- [Qwen 0.5B report](outputs/analysis/qwen2.5_0.5b_instruct_eval_v2/analysis_report.md)
+- [Qwen 0.5B direct contrasts](outputs/analysis/qwen2.5_0.5b_instruct_eval_v2/main_text_direct_contrasts.csv)
 
 ### Final revision package
 
-- Appendix draft: [`docs/final_revision/appendix_draft.md`](docs/final_revision/appendix_draft.md)
-- Main-text stats table: [`docs/final_revision/main_text_stats_table.md`](docs/final_revision/main_text_stats_table.md)
-- Appendix stats table: [`docs/final_revision/appendix_stats_table.md`](docs/final_revision/appendix_stats_table.md)
-- Reviewer-risk memo: [`docs/final_revision/reviewer_risk_memo_final.md`](docs/final_revision/reviewer_risk_memo_final.md)
-
-### Final combined analysis
-
-- Readout: [`outputs/analysis/final_readout.md`](outputs/analysis/final_readout.md)
-- Main-text contrasts: [`outputs/analysis/final_combined_v2/main_text_direct_contrasts.csv`](outputs/analysis/final_combined_v2/main_text_direct_contrasts.csv)
-- Full appendix contrasts: [`outputs/analysis/final_combined_v2/appendix_direct_contrasts_full.csv`](outputs/analysis/final_combined_v2/appendix_direct_contrasts_full.csv)
-- Qualitative examples: [`outputs/analysis/final_combined_v2/qualitative_examples.csv`](outputs/analysis/final_combined_v2/qualitative_examples.csv)
-- Figure notes: [`outputs/analysis/final_combined_v2/figure_notes.md`](outputs/analysis/final_combined_v2/figure_notes.md)
-
-## Experimental Defaults
-
-- Candidate pool: `150` items
-- Locked development split: `30` items
-- Locked evaluation split: `120` items
-- Sanity subset: `40` eval items for `judgment_only`
-- Main model: `qwen2.5:7b-instruct`
-- Smaller comparison model: `qwen2.5:0.5b-instruct`
-- Deterministic decoding by default
-- Two frame modes:
-  - `selected`
-  - `family_audit` (implemented, not yet complete as a reported result set)
-
-## Output Schema
-
-Each experiment row is normalized into a single JSON object with:
-
-- `model`
-- `split`
-- `run_id`
-- `condition`
-- `item_id`
-- `seed`
-- `temperature`
-- `max_judgment_tokens`
-- `max_explanation_tokens`
-- `frame_mode`
-- `frame_family`
-- `frame_variant_id`
-- `frame_position`
-- `frames_config_version`
-- `j1_act`
-- `j1_heart`
-- `e_focus`
-- `e_text`
-- `j2_act`
-- `j2_heart`
-- `raw_trace`
+- [Appendix draft](docs/final_revision/appendix_draft.md)
+- [Main-text stats table](docs/final_revision/main_text_stats_table.md)
+- [Appendix stats table](docs/final_revision/appendix_stats_table.md)
+- [Reviewer-risk memo](docs/final_revision/reviewer_risk_memo_final.md)
+- [Safe claims](docs/final_revision/safe_claims.md)
+- [Avoid claims](docs/final_revision/avoid_claims.md)
 
 ## Current Claim Boundary
 
-This repository does **not** support the strongest version of the original story.
+This repository supports the following claims well:
 
-What it supports well:
+- staged prompting reveals a real separation between **first-pass exposed judgment** and **post-hoc explanation**
+- explanation outputs are more prompt-sensitive than first-pass judgment **relative to baseline**
+- the direct Christian-over-secular first-pass heart effect in 7B is **modest**
+- the Christian-specific explanation residual becomes **weak or unstable** once matched-control comparison and lexical-echo control are applied
 
-- stage dissociation between first-pass exposed judgment and post-hoc explanation
-- modest Christian-over-secular first-pass heart movement at `7B`
-- prompt-sensitive explanation behavior relative to baseline
-- caution against reading bundled judgment+explanation outputs as if they reflected one stable mechanism
+This repository does **not** currently support strong claims that:
 
-What it does **not** currently support strongly:
+- Christian prompting robustly improves moral reasoning
+- Christian prompting yields a stable uniquely Christian explanation advantage
+- prompt-induced explanation changes reliably propagate into strong downstream judgment revision
 
-- a stable, uniquely Christian-specific explanation advantage under matched-control comparison
-- strong downstream judgment rewriting from `J1` to `J2`
-- broad claims about moral improvement
-
-Two parts remain explicitly pending:
+Two pieces remain explicitly pending:
 
 - human judgment-explanation consistency annotation
 - full paraphrase-family audit results
 
-## Why This May Be Useful Beyond This Paper
+## If You Want To Build On This
 
-Even if you do not care about Christian framing specifically, the repo gives you a reusable pattern for any value- or persona-framing study:
+The most reusable design lesson is simple:
 
-- separate judgment from explanation
-- include a matched control, not only a baseline
-- control for lexical echo before claiming semantic explanation change
-- test whether explanation movement actually propagates into later judgment
+1. separate judgment from explanation
+2. include a matched control, not only a baseline
+3. control for lexical echo before claiming semantic explanation change
+4. test whether explanation movement actually propagates into later judgment
 
-That design logic transfers cleanly to political, legal, safety, religious, and alignment-sensitive prompting studies.
-
-## Status
-
-- Canonical manuscript and PDF are complete.
-- Final paper-facing analysis artifacts are committed.
-- Same-family scale comparison is complete.
-- Family-audit support exists in the codebase, but full family-audit results are not yet part of the final evidence base.
+That logic should transfer to many other prompting domains where interpretability matters more than leaderboard-style single scores.
 
 ## Citation
 
-If this project is useful in your work, please cite the paper or link this repository once the public GitHub URL is live.
+If this repository is useful in your work, please cite the paper or link the repository.
