@@ -1,0 +1,27 @@
+{
+  "source_result_paths": [
+    "outputs/runs/qwen2.5_7b_instruct_eval_locked_v1.jsonl",
+    "outputs/runs/qwen2.5_0.5b_instruct_eval_v2.jsonl"
+  ],
+  "model_names": [
+    "qwen2.5:0.5b-instruct",
+    "qwen2.5:7b-instruct"
+  ],
+  "split_values": [
+    "eval"
+  ],
+  "item_count": 120,
+  "bootstrap_samples": 1000,
+  "bootstrap_seed": 42,
+  "permutation_samples": 5000,
+  "items_path": "data/processed/eval_items_locked_v1.jsonl",
+  "frames_path": "configs/frames.yaml",
+  "frame_modes_present": [
+    "selected"
+  ],
+  "output_dir": "outputs/analysis/final_combined_v2",
+  "skipped_metrics": [
+    "human_consistency_annotation:no_annotation_file",
+    "family_audit:no_family_audit_rows"
+  ]
+}

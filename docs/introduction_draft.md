@@ -1,0 +1,20 @@
+# Introduction Draft
+
+Prompt-based work on LLM moral evaluation often treats a model's answer as a unitary object: the model is shown a scenario, produces a judgment plus a rationale, and the combined output is scored as evidence of moral reasoning ability. This setup is useful for benchmarking, but it hides an identification problem. When a prompt changes a model's moral output, did it change the model's first-pass exposed judgment, or did it mainly change how the model explains that judgment afterward?
+
+This paper addresses that narrower mechanism question. Rather than asking whether Christian framing broadly improves or worsens LLM morality, we ask whether Christian heart-focused framing changes first-pass exposed judgment or mainly reshapes post-hoc explanation. The distinction matters because explanation-layer change can easily be misread as deeper moral change when judgment and rationale are elicited together.
+
+Our theoretical lens is Haidt's Social Intuitionist Model (SIM), used operationally rather than ontologically. We do not claim that LLMs literally have human intuitions. Instead, SIM provides a useful decomposition of observable output into stages that may respond differently to prompting: a first-pass exposed judgment, a later explanation, and a possible re-judgment after explanation. This stage decomposition is the paper's main methodological contribution.
+
+Christian framing is a useful probe because it naturally foregrounds heart, motive, and inner posture. That makes it a plausible candidate for moving first-pass exposed `heart_worse` judgments if the framing penetrates evaluation before explanation. At the same time, Christian wording may also function as a rhetorical resource for post-hoc explanation. A model can leave `J1` unchanged and still redescribe the same choice in more heart-focused language. To distinguish these possibilities, we compare Christian framing against a matched secular motive-focused control rather than against baseline alone.
+
+We build a staged benchmark from everyday Moral Stories scenarios rather than trolley-style dilemmas. Each item is rewritten into a contrastive A/B vignette and elicited in three stages: `J1`, an immediate forced-choice judgment; `E`, a structured explanation tied to the earlier `J1`; and `J2`, a re-judgment after explanation. The five main conditions are `baseline`, `secular_pre`, `christian_pre`, `secular_post`, and `christian_post`, plus a `judgment_only` sanity subset. The most diagnostic condition is `christian_post`, because its timing allows explanation to change without changing the timing of first-pass exposed judgment.
+
+The completed evidence supports stage dissociation more strongly than a robust Christian-specific advantage claim. In `qwen2.5:7b-instruct`, Christian pre-framing produces a modest direct Christian-minus-secular first-pass heart contrast of `+1.67` percentage points, while act-level first-pass movement remains near zero. Relative to baseline, explanation language is more prompt-sensitive than first-pass exposed judgment, but direct Christian-versus-secular explanation contrasts weaken or disappear under matched-control comparison and lexical-echo control. The smaller same-family comparison model, `qwen2.5:0.5b-instruct`, attenuates the Christian-specific story further rather than stabilizing it.
+
+The paper contributes three things. First, it introduces a stage-separated benchmark for LLM moral prompting that distinguishes first-pass exposed judgment from post-hoc explanation. Second, it shows that these layers can move differently under prompting, which cautions against naive readings of bundled judgment-plus-rationale outputs. Third, it uses a theory-linked moral-psychology lens to sharpen interpretation while keeping claims disciplined: the strongest evidence concerns mechanism separation, not broad moral change and not a stable uniquely Christian explanation advantage.
+
+中文提示：
+- intro 现在明确把 Christian framing 定位成 probe，不是 normative standard。
+- SIM 是 operational analogy，不是 ontological claim。
+- matched secular control 和 lexical echo control 都提前在 intro 里讲清楚了。

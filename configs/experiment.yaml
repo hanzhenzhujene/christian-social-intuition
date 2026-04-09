@@ -1,0 +1,50 @@
+dataset:
+  raw_path: data/raw/moral_stories_full.jsonl
+  candidate_pool_path: data/processed/candidate_pool_v1.jsonl
+  draft_dev_path: data/processed/dev_items_v1.jsonl
+  draft_eval_path: data/processed/eval_items_v1.jsonl
+  dev_path: data/processed/dev_items_locked_v1.jsonl
+  eval_path: data/processed/eval_items_locked_v1.jsonl
+  review_csv_path: data/processed/item_review_v1.csv
+  annotation_sheet_path: outputs/analysis/explanation_annotation_sheet.csv
+  candidate_limit: 150
+  dev_size: 30
+  eval_size: 120
+  sanity_subset_size: 40
+  seed: 42
+
+runtime:
+  ollama_base_url: http://127.0.0.1:11434
+  timeout_seconds: 120
+  temperature: 0.0
+  max_judgment_tokens: 80
+  max_explanation_tokens: 100
+  resume: true
+  frame_mode: selected
+
+models:
+  main: qwen2.5:7b-instruct
+  comparison: qwen2.5:0.5b-instruct
+
+run_presets:
+  selected_v2:
+    split: eval
+    frame_mode: selected
+    item_count: 120
+    include_sanity_subset: true
+    models:
+      - qwen2.5:7b-instruct
+      - qwen2.5:0.5b-instruct
+  family_audit_v2:
+    split: eval
+    frame_mode: family_audit
+    item_count: 120
+    include_sanity_subset: true
+    models:
+      - qwen2.5:7b-instruct
+      - qwen2.5:0.5b-instruct
+
+analysis:
+  bootstrap_samples: 1000
+  bootstrap_seed: 42
+  permutation_samples: 5000

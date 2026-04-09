@@ -1,0 +1,3 @@
+model,n_items,j1_act_agreement,j1_heart_agreement
+qwen2.5:7b-instruct,40,1.0,1.0
+qwen2.5:0.5b-instruct,40,1.0,1.0

@@ -1,0 +1,77 @@
+version: frames_v2
+
+selected_v2:
+  christian: christian_v1
+  secular: secular_v1
+
+family_audit_v2:
+  christian:
+    - christian_v1
+    - christian_v2
+    - christian_v3
+  secular:
+    - secular_v1
+    - secular_v2
+    - secular_v3
+
+families:
+  christian:
+    label: Christian heart-focused framing
+    variants:
+      - id: christian_v1
+        text: "Consider not only the outward act but the heart behind it. Attend to motive, inner posture, and what kind of person the choice expresses."
+      - id: christian_v2
+        text: "Read the options with attention to the heart, not only the visible act. Weigh motive, inward posture, and what the choice reveals about character."
+      - id: christian_v3
+        text: "Before answering, look past surface behavior and consider the heart at work. Focus on motive, inward disposition, and revealed character."
+  secular:
+    label: Secular motive-focused framing
+    variants:
+      - id: secular_v1
+        text: "Consider not only the outward act but the underlying motive behind it. Attend to intention, inner posture, and what kind of person the choice expresses."
+      - id: secular_v2
+        text: "Read the options with attention to motive, not only visible behavior. Weigh intention, inner posture, and what the choice reveals about character."
+      - id: secular_v3
+        text: "Before answering, look past surface behavior and consider the underlying motive. Focus on intention, inward disposition, and revealed character."
+
+lexicons:
+  strict_echo_terms:
+    - outward act
+    - visible act
+    - visible behavior
+    - surface behavior
+    - heart behind it
+    - heart at work
+    - underlying motive
+    - motive
+    - intention
+    - inner posture
+    - inward posture
+    - inward disposition
+    - kind of person
+    - reveals about character
+    - revealed character
+    - heart
+    - character
+    - posture
+  non_echo_semantic_terms:
+    - selfish
+    - self-serving
+    - greedy
+    - resentful
+    - dishonest
+    - manipulative
+    - callous
+    - cruel
+    - uncaring
+    - careless
+    - exploitative
+    - disrespectful
+    - spiteful
+    - arrogant
+    - compassionate
+    - generous
+    - considerate
+    - kind
+    - malicious
+    - prejudiced
