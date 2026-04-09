@@ -1,3 +1,5 @@
+![Project overview figure](paper/figures/study_overview_main.png)
+
 # Christian Framing × the Social Intuitionist Model for LLMs
 
 This repository asks a narrower and more useful question than most moral-prompting papers:
@@ -11,8 +13,6 @@ To answer that, the project turns everyday **Moral Stories** scenarios into stag
 - `J2`: re-judgment after explanation
 
 The result is a mechanism-oriented benchmark for testing whether prompt effects are really judgment effects, explanation effects, or both.
-
-![First-pass shifts across Qwen sizes](paper/figures/first_pass_shift.png)
 
 ## Why This Repo Exists
 
