@@ -4,7 +4,7 @@
 
 [Paper (PDF)](paper/main.pdf) · [Canonical LaTeX](paper/main.tex) · [Qwen 7B analysis](outputs/analysis/qwen2.5_7b_instruct_eval_v2/analysis_report.md) · [Qwen 0.5B analysis](outputs/analysis/qwen2.5_0.5b_instruct_eval_v2/analysis_report.md)
 
-![Research advance overview](paper/figures/readme_research_advance.png)
+![Study overview](paper/figures/study_overview_main.png)
 
 ## Why This Repository Is An Advance
 
