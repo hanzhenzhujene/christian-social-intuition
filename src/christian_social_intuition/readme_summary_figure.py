@@ -65,7 +65,7 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
     fig.text(
         0.08,
         0.965,
-        "Results Summary: explanation is more prompt-sensitive than first-pass judgment",
+        "What moves, what survives control, and what barely changes",
         ha="left",
         va="top",
         fontsize=17,
@@ -74,7 +74,7 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
     fig.text(
         0.08,
         0.922,
-        "README summary of the completed Qwen runs.",
+        "The payoff of the staged design is that it separates baseline movement from Christian-specific residuals.",
         ha="left",
         va="top",
         fontsize=11.2,
@@ -121,7 +121,7 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
     ax_left.set_xlim(0, 0.11)
     ax_left.xaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
     ax_left.set_xlabel("Rate")
-    ax_left.set_title("A. Christian framing vs baseline by output stage")
+    ax_left.set_title("A. Relative to baseline: explanation moves more than act-level judgment")
     ax_left.grid(axis="x", color="#DDDDDD", linewidth=0.8)
     ax_left.set_axisbelow(True)
     ax_left.legend(
@@ -170,7 +170,7 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
     ax_right.xaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
     ax_right.set_xlim(-0.16, 0.08)
     ax_right.set_xlabel("Christian minus matched secular control")
-    ax_right.set_title("B. Direct Christian-minus-secular contrasts")
+    ax_right.set_title("B. Under matched control: the Christian-specific residual weakens")
     ax_right.grid(axis="x", color="#DDDDDD", linewidth=0.8)
     ax_right.set_axisbelow(True)
     ax_right.legend(
