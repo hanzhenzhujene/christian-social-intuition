@@ -3,6 +3,7 @@
 [![CI](https://github.com/hanzhenzhujene/christian-social-intuition/actions/workflows/ci.yml/badge.svg)](https://github.com/hanzhenzhujene/christian-social-intuition/actions/workflows/ci.yml)
 [![Paper](https://img.shields.io/badge/paper-PDF-1f4d8f)](paper/main.pdf)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Citation metadata](https://img.shields.io/badge/citation-CITATION.cff-blue)](CITATION.cff)
 
 > Paper companion repository for a stage-separated study of whether prompting changes an LLM's **first-pass exposed judgment** or mainly its **post-hoc explanation**.
 
@@ -41,6 +42,7 @@ The Christian-framing case study is the application. The broader contribution is
 - [paper/main.pdf](paper/main.pdf) for the canonical writeup
 - [outputs/analysis/final_combined_v2/analysis_report.md](outputs/analysis/final_combined_v2/analysis_report.md) for the combined empirical readout
 - [docs/final_revision/appendix_draft.md](docs/final_revision/appendix_draft.md) for metric definitions, prompt text, and reproducibility details
+- [CONTRIBUTING.md](CONTRIBUTING.md) for contribution and validation expectations
 
 ## Reproduce The Released Artifacts
 
@@ -238,3 +240,15 @@ Two pieces remain explicitly pending:
 ## Citation
 
 If this repository is useful in your work, please cite the paper and/or the repository metadata in [CITATION.cff](CITATION.cff).
+
+BibTeX-style software citation:
+
+```bibtex
+@software{zhu2026christian_social_intuition,
+  author = {Zhu, Hanzhen},
+  title = {Christian Framing x the Social Intuitionist Model for LLMs},
+  year = {2026},
+  url = {https://github.com/hanzhenzhujene/christian-social-intuition},
+  version = {0.1.0}
+}
+```
