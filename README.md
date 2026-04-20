@@ -1,12 +1,27 @@
 # Christian Framing × the Social Intuitionist Model for LLMs
 
-> A stage-separated benchmark for testing whether prompting changes an LLM's **first-pass exposed judgment** or mainly its **post-hoc explanation**.
+[![CI](https://github.com/hanzhenzhujene/christian-social-intuition/actions/workflows/ci.yml/badge.svg)](https://github.com/hanzhenzhujene/christian-social-intuition/actions/workflows/ci.yml)
+[![Paper](https://img.shields.io/badge/paper-PDF-1f4d8f)](paper/main.pdf)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
+> Paper companion repository for a stage-separated study of whether prompting changes an LLM's **first-pass exposed judgment** or mainly its **post-hoc explanation**.
 
 [Paper (PDF)](paper/main.pdf) · [Canonical LaTeX](paper/main.tex) · [Qwen 7B analysis](outputs/analysis/qwen2.5_7b_instruct_eval_v2/analysis_report.md) · [Qwen 0.5B analysis](outputs/analysis/qwen2.5_0.5b_instruct_eval_v2/analysis_report.md)
 
 ![Study overview](paper/figures/study_overview_main.png)
 
-## Why This Repository Exists
+## At a Glance
+
+| Item | Release |
+|---|---|
+| Research question | When prompting changes moral output, does it change **first-pass exposed judgment** or mainly **post-hoc explanation**? |
+| Benchmark design | Stage-separated `J1 -> E -> J2` with matched Christian and secular motive-focused framing |
+| Data | `120` locked eval items + `40` judgment-only sanity items derived from Moral Stories |
+| Models | `qwen2.5:7b-instruct` and `qwen2.5:0.5b-instruct` |
+| Main take-home | Explanation is more prompt-sensitive than first-pass judgment relative to baseline; Christian-specific residuals weaken under matched control |
+| Release status | Committed selected-v2 raw runs, regenerated analysis bundles, compiled paper PDF, and CI smoke checks |
+
+## Why This Repository Is Worth Reading
 
 Most prompt-effect papers on LLM morality, values, or personas score a single bundled answer: judgment plus rationale. That setup is useful for benchmarking, but it leaves one central identification problem unresolved:
 
@@ -21,7 +36,13 @@ This repository is designed to answer that question directly. It adds four piece
 
 The Christian-framing case study is the application. The broader contribution is a reusable evaluation design for identifying **where prompting acts**.
 
-## Quickstart
+## What To Read First
+
+- [paper/main.pdf](paper/main.pdf) for the canonical writeup
+- [outputs/analysis/final_combined_v2/analysis_report.md](outputs/analysis/final_combined_v2/analysis_report.md) for the combined empirical readout
+- [docs/final_revision/appendix_draft.md](docs/final_revision/appendix_draft.md) for metric definitions, prompt text, and reproducibility details
+
+## Reproduce The Released Artifacts
 
 If you want to reproduce the released paper-facing artifacts from the committed raw runs:
 
@@ -30,7 +51,12 @@ make setup
 make release-check
 ```
 
-This will:
+This is the same release path the repository is designed to support locally, and GitHub Actions now runs the lightweight subset on every push and pull request:
+
+- `pytest -q`
+- `make paper-smoke`
+
+The full local release check will:
 
 - install pinned dependencies
 - run the test suite
@@ -53,7 +79,7 @@ make rerun-selected-v2
 make release-check
 ```
 
-## What This Lets You Test That Bundled Evaluations Cannot
+## What This Benchmark Identifies That Bundled Evaluations Cannot
 
 | Question | Standard bundled answer | This repository |
 |---|---|---|

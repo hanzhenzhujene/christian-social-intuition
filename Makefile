@@ -2,7 +2,7 @@ PYTHON ?= python
 PIP ?= $(PYTHON) -m pip
 PKG ?= christian_social_intuition
 
-.PHONY: help setup test refresh-analysis refresh-figures paper release-check rerun-selected-v2 clean
+.PHONY: help setup test refresh-analysis refresh-figures paper paper-smoke release-check rerun-selected-v2 clean
 
 help:
 	@echo "Available targets:"
@@ -11,6 +11,7 @@ help:
 	@echo "  make refresh-analysis    Rebuild analysis bundles from the committed selected-v2 raw runs"
 	@echo "  make refresh-figures     Rebuild README and paper figure assets"
 	@echo "  make paper               Recompile the LaTeX paper"
+	@echo "  make paper-smoke         Smoke-check the LaTeX paper build"
 	@echo "  make release-check       Run tests, rebuild paper-facing artifacts, and recompile the PDF"
 	@echo "  make rerun-selected-v2   Re-run both Qwen selected-v2 experiments (requires local Ollama models)"
 	@echo "  make clean               Remove local LaTeX and pytest cache artifacts"
@@ -48,6 +49,8 @@ paper:
 	cd paper && pdflatex -interaction=nonstopmode -halt-on-error main.tex >/tmp/csi_paper_build.log
 	cd paper && pdflatex -interaction=nonstopmode -halt-on-error main.tex >/tmp/csi_paper_build.log
 	@tail -n 5 /tmp/csi_paper_build.log
+
+paper-smoke: paper
 
 release-check: test refresh-analysis refresh-figures paper
 
