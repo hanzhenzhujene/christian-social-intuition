@@ -19,7 +19,7 @@ help:
 
 setup:
 	$(PIP) install --upgrade pip
-	$(PIP) install -r requirements.lock.txt -r requirements-dev.lock.txt
+	$(PIP) install -r requirements/runtime.lock.txt -r requirements/dev.lock.txt
 	$(PIP) install -e . --no-deps
 
 test:

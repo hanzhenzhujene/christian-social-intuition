@@ -140,7 +140,7 @@ The Christian-framing case study is the application. The broader contribution is
 - [outputs/analysis/final_combined_v2/analysis_report.md](outputs/analysis/final_combined_v2/analysis_report.md) for the empirical readout
 - [docs/final_revision/appendix_draft.md](docs/final_revision/appendix_draft.md) for prompts, metrics, and appendix detail
 - [outputs/README.md](outputs/README.md) for the released run and analysis layout
-- [CONTRIBUTING.md](CONTRIBUTING.md) for validation expectations
+- [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) for validation expectations
 
 ## Reproduce The Released Artifacts
 
@@ -237,8 +237,8 @@ Directory guides:
 ### Pinned environment
 
 - Python `>=3.11`
-- locked runtime dependencies in [requirements.lock.txt](requirements.lock.txt)
-- locked dev dependencies in [requirements-dev.lock.txt](requirements-dev.lock.txt)
+- locked runtime dependencies in [requirements/runtime.lock.txt](requirements/runtime.lock.txt)
+- locked dev dependencies in [requirements/dev.lock.txt](requirements/dev.lock.txt)
 
 ### Command-line entrypoint
 
@@ -255,7 +255,7 @@ If you prefer not to use the Makefile, the core commands are:
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install -r requirements.lock.txt -r requirements-dev.lock.txt
+python -m pip install -r requirements/runtime.lock.txt -r requirements/dev.lock.txt
 python -m pip install -e . --no-deps
 pytest -q
 PYTHONPATH=src python -m christian_social_intuition.cli analyze-results \
