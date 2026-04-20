@@ -28,4 +28,4 @@
 ## Figure 6
 
 **Title concept:** exploratory heterogeneity by item type  
-**Caption:** This figure is used to probe where motive-sensitive effects may concentrate, not to claim confirmed category-level effects. The scale comparison again looks more like attenuation and instability than robustness success.
+**Caption:** This figure is used to probe where motive-sensitive effects may concentrate, not to claim confirmed category-level effects. Across model size, the category pattern remains attenuated and unstable rather than consistent.

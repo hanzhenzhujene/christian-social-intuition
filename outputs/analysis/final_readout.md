@@ -2,9 +2,9 @@
 
 ## Run Status
 
-- Main-model v2 analysis is available at [qwen2.5_7b_instruct_eval_v2](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/outputs/analysis/qwen2.5_7b_instruct_eval_v2).
-- Same-family smaller-model analysis is now available at [qwen2.5_0.5b_instruct_eval_v2](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/outputs/analysis/qwen2.5_0.5b_instruct_eval_v2).
-- `family_audit` support is implemented and smoke-validated for `qwen2.5:0.5b-instruct` at [qwen2.5_0.5b_instruct_smoke_family_audit_v2](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/outputs/analysis/qwen2.5_0.5b_instruct_smoke_family_audit_v2).
+- Main-model v2 analysis is available at [qwen2.5_7b_instruct_eval_v2](qwen2.5_7b_instruct_eval_v2/analysis_report.md).
+- Same-family smaller-model analysis is now available at [qwen2.5_0.5b_instruct_eval_v2](qwen2.5_0.5b_instruct_eval_v2/analysis_report.md).
+- `family_audit` support is implemented in code, but full paraphrase-family audit outputs are not part of the current public claim set.
 
 ## Main Pattern in the Revised 7B Analysis
 
@@ -59,6 +59,6 @@ The same-family comparison therefore points to attenuation, not reinforcement. T
 - Keep human explanation-consistency coding labeled as pending until the annotation sheet is filled.
 - Use the completed appendix and direct-contrast tables in the final submission package rather than reverting to older baseline-only summaries.
 
-## Chinese Note
+## Release Boundary
 
-这份 v2 readout 最重要的变化是：旧版“Christian framing 主要改 explanation layer”的强叙事，现在不能再直接沿用。更准确的说法是 explanation layer 本身很可变，但 Christian-specific 的那一部分在 matched secular control 下明显变弱了。 
+This readout is calibrated to the completed selected-v2 Qwen runs. It supports a stage-dissociation claim more strongly than a stable Christian-specific advantage claim, and it keeps human-coded consistency plus full paraphrase-family audit results explicitly out of scope.

@@ -1,6 +1,8 @@
 import json
+from pathlib import Path
 
 import pandas as pd
+from PIL import Image
 
 from christian_social_intuition.analysis import (
     build_appendix_direct_contrasts,
@@ -21,6 +23,8 @@ from christian_social_intuition.analysis import (
     plot_revision_figure,
     select_qualitative_examples,
 )
+from christian_social_intuition.readme_summary_figure import build_readme_results_summary
+from christian_social_intuition.study_overview_figure import build_study_overview_figure
 
 
 def _demo_results() -> pd.DataFrame:
@@ -125,6 +129,11 @@ def _lexicons() -> dict:
     }
 
 
+def _assert_rgb_png(path: Path) -> None:
+    with Image.open(path) as image:
+        assert image.mode == "RGB"
+
+
 def test_compute_condition_summary_has_expected_columns():
     summary = compute_condition_summary(_demo_results(), lexicons=_lexicons(), bootstrap_samples=50, bootstrap_seed=1)
     expected = {
@@ -214,6 +223,19 @@ def test_plot_functions_write_files(tmp_path):
 
     for path in [first_pass, explanation, dissociation, revision_path, heterogeneity_path, comparison_path]:
         assert path.exists() and path.stat().st_size > 0
+        _assert_rgb_png(path)
+
+
+def test_release_companion_figures_are_saved_as_rgb_png(tmp_path):
+    readme_path = tmp_path / "readme_summary.png"
+    overview_path = tmp_path / "study_overview.png"
+
+    build_readme_results_summary(readme_path)
+    build_study_overview_figure(overview_path)
+
+    for path in [readme_path, overview_path]:
+        assert path.exists() and path.stat().st_size > 0
+        _assert_rgb_png(path)
 
 
 def test_select_qualitative_examples_and_figure_notes():

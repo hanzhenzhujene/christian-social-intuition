@@ -29,6 +29,7 @@ CONDITION_FRAME_META = {
 
 
 def load_items(path: str | Path) -> list[ItemRecord]:
+    """Load the locked benchmark split from JSONL into ItemRecord instances."""
     rows: list[ItemRecord] = []
     with Path(path).open("r", encoding="utf-8") as handle:
         for line in handle:
@@ -38,6 +39,7 @@ def load_items(path: str | Path) -> list[ItemRecord]:
 
 
 def load_existing_results(path: str | Path) -> dict[tuple[str, str, str, str], dict]:
+    """Index an existing result JSONL by model, condition, item, and frame variant for resume support."""
     result: dict[tuple[str, str, str, str], dict] = {}
     file_path = Path(path)
     if not file_path.exists():
@@ -52,6 +54,7 @@ def load_existing_results(path: str | Path) -> dict[tuple[str, str, str, str], d
 
 
 def select_sanity_subset(items: Iterable[ItemRecord], *, size: int, seed: int = 42) -> list[ItemRecord]:
+    """Choose a small tag-stratified subset for the judgment-only baseline sanity condition."""
     import random
     from collections import defaultdict
 
@@ -73,6 +76,8 @@ def select_sanity_subset(items: Iterable[ItemRecord], *, size: int, seed: int = 
 
 
 class ExperimentRunner:
+    """Run the staged protocol and emit schema-aligned rows plus a manifest."""
+
     def __init__(
         self,
         *,
@@ -166,6 +171,7 @@ class ExperimentRunner:
         }
 
     def run_condition(self, item: ItemRecord, condition: str, *, frame_variant: dict | None = None) -> ExperimentResult:
+        """Execute one item under one condition while preserving prompts and raw responses in `raw_trace`."""
         meta = CONDITION_FRAME_META[condition]
         frame_family = meta["family"]
         frame_position = meta["position"]
@@ -268,6 +274,7 @@ class ExperimentRunner:
         resume: bool = True,
         config_path: str | Path | None = None,
     ) -> Path:
+        """Run a split end-to-end, append new rows to disk, and write a manifest beside the JSONL file."""
         output_file = Path(output_path)
         output_file.parent.mkdir(parents=True, exist_ok=True)
         existing = load_existing_results(output_file) if resume else {}

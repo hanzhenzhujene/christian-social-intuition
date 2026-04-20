@@ -91,7 +91,7 @@ Return JSON with exactly these keys:
 - `christian_pre`: `C -> J1 -> E -> J2`
 - `secular_post`: `J1 -> S -> E -> J2`
 - `christian_post`: `J1 -> C -> E -> J2`
-- `judgment_only`: `J1` only
+- `judgment-only baseline` (internal key: `baseline_judgment_only`): `J1` only
 
 The key design feature is timing: post-`J1` frames can affect explanation and revision, but not the timing of first-pass exposed judgment.
 
@@ -223,6 +223,8 @@ It is needed to determine whether explanation text actually supports the model's
   - temperature `0.0`
   - seed `42`
   - deterministic decoding
+  - `max_judgment_tokens = 80`
+  - `max_explanation_tokens = 100`
 - Items:
   - eval `120`
   - sanity subset `40`

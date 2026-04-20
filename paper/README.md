@@ -30,7 +30,7 @@ make paper
 ## Manual LaTeX build
 
 ```bash
-cd /Users/hanzhenzhu/Desktop/Christian_Social_intuition/paper
+cd paper
 pdflatex -interaction=nonstopmode -halt-on-error main.tex
 pdflatex -interaction=nonstopmode -halt-on-error main.tex
 ```
@@ -40,3 +40,4 @@ pdflatex -interaction=nonstopmode -halt-on-error main.tex
 - The figures under `paper/figures/` are copied release artifacts generated from `outputs/analysis/`.
 - The manuscript treats human-coded judgment-explanation consistency as pending and does not claim completed annotation-based results.
 - The current public release is calibrated to the completed selected-v2 Qwen runs documented in `outputs/runs/`.
+- Figure-by-figure asset notes live in [`figures/README.md`](figures/README.md).

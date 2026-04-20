@@ -69,5 +69,8 @@ rerun-selected-v2:
 		--output outputs/runs/qwen2.5_0.5b_instruct_eval_v2.jsonl
 
 clean:
-	rm -f paper/*.aux paper/*.log paper/*.out
+	find . -type d -name '__pycache__' -prune -exec rm -rf {} +
+	find . -name '.DS_Store' -delete
 	rm -rf .pytest_cache
+	rm -f paper/*.aux paper/*.log paper/*.out
+	rm -rf paper/figures_smoke_v2

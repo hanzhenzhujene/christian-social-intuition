@@ -25,13 +25,13 @@
 
 \title{Judgment Before Justification: Christian Framing and Stage Dissociation in LLM Moral Evaluation}
 \author{Anonymous Local Draft}
-\date{April 20, 2026}
+\date{}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-Prompt-based studies of LLM morality often evaluate a single response that bundles judgment and explanation, making it hard to tell whether prompting changes first-pass exposed moral choice or only the language of post-hoc explanation. We study this distinction with a staged design inspired by the Social Intuitionist Model, asking whether Christian heart-focused framing changes first-pass exposed judgment or mainly reshapes later explanation. We derive 120 contrastive everyday scenarios from Moral Stories and elicit staged responses in a \texttt{J1 $\rightarrow$ E $\rightarrow$ J2} protocol, comparing Christian and matched secular motive-focused framing before versus after initial judgment. On \texttt{qwen2.5:7b-instruct}, Christian pre-framing shifts first-pass heart judgments on 9.17\% of items, compared with 7.50\% under the matched secular pre-frame, yielding a modest direct Christian-minus-secular contrast of +1.67 percentage points. Relative to baseline, explanation language is more prompt-sensitive than first-pass exposed judgment, but the direct Christian-versus-secular explanation contrast weakens under matched-control comparison and does not remain positive in the completed 7B run after lexical echo is controlled. A same-family size comparison with \texttt{qwen2.5:0.5b-instruct} attenuates the Christian-specific story further: the direct first-pass heart contrast disappears (-0.83 points), and the controlled explanation contrast is small and unstable (+2.50 points, CI spanning zero). \texttt{J1}-to-\texttt{J2} revision is rare in both models, suggesting that explanation can move while exposed judgments remain largely stable. Both models pass the judgment-only sanity check perfectly (1.0 / 1.0). The strongest supported conclusion is therefore a mechanism distinction: staged prompting reveals stronger prompt sensitivity in post-hoc explanation than in first-pass exposed judgment, but not a robust uniquely Christian-specific explanation advantage.
+Prompt-based studies of LLM morality often evaluate a single response that bundles judgment and explanation, making it hard to tell whether prompting changes first-pass exposed moral choice or only the language of post-hoc explanation. We study this distinction with a staged design inspired by the Social Intuitionist Model, asking whether Christian heart-focused framing changes first-pass exposed judgment or mainly reshapes later explanation. We derive 120 contrastive everyday scenarios from Moral Stories and elicit staged responses in a \texttt{J1 $\rightarrow$ E $\rightarrow$ J2} protocol, comparing Christian and matched secular motive-focused framing before versus after initial judgment. On \texttt{qwen2.5:7b-instruct}, Christian pre-framing shifts first-pass heart judgments on 9.17\% of items, compared with 7.50\% under the matched secular pre-frame, yielding a modest direct Christian-minus-secular contrast of +1.67 percentage points. Relative to baseline, explanation language is more prompt-sensitive than first-pass exposed judgment, but the direct Christian-versus-secular explanation contrast weakens under matched-control comparison and does not remain positive in the completed 7B run after lexical echo is controlled. A same-family size comparison with \texttt{qwen2.5:0.5b-instruct} attenuates the Christian-specific story further: the direct first-pass heart contrast disappears (-0.83 points), and the controlled explanation contrast is small and unstable (+2.50 points, CI spanning zero). \texttt{J1}-to-\texttt{J2} revision is rare in both models, suggesting that explanation can move while exposed judgments remain largely stable. Both models pass the judgment-only baseline sanity check perfectly (1.0 / 1.0). The strongest supported conclusion is therefore a mechanism distinction: staged prompting reveals stronger prompt sensitivity in post-hoc explanation than in first-pass exposed judgment, but not a robust uniquely Christian-specific explanation advantage.
 \end{abstract}
 
 \begin{figure}[t]
@@ -45,13 +45,13 @@ Prompt-based studies of LLM morality often evaluate a single response that bundl
 
 Prompt-based work on LLM moral evaluation often treats a model's answer as a unitary object: the model is shown a scenario, produces a judgment plus a rationale, and the combined output is scored as evidence of moral reasoning ability. This design is useful for benchmarking, but it hides an identification problem. When a prompt changes a moral answer, what exactly moved? Did the prompt change the model's first-pass exposed judgment, or did it mainly change how the model justified a judgment that was already in place?
 
-This paper addresses that question directly. Rather than asking whether Christian framing broadly improves or worsens LLM morality, we ask a narrower mechanism question: does Christian heart-focused framing change first-pass exposed judgment, or does it mainly reshape post-hoc explanation? This distinction matters because bundled judgment-plus-rationale outputs can make explanation-layer change look like deeper moral change. If a model keeps the same first-pass choice but switches to more motive-focused or more Christian-coded language when explaining it, a single-score benchmark can overstate what the prompt actually did. Figure~\ref{fig:overview} gives an overview of the benchmark, stage separation, and claim boundary that organize the rest of the paper.
+This paper addresses that question directly. Rather than asking whether Christian framing broadly changes LLM moral behavior, we ask a narrower mechanism question: does Christian heart-focused framing change first-pass exposed judgment, or does it mainly reshape post-hoc explanation? This distinction matters because bundled judgment-plus-rationale outputs can make explanation-layer change look like deeper moral change. If a model keeps the same first-pass choice but switches to more motive-focused or more Christian-coded language when explaining it, a single-score benchmark can overstate what the prompt actually did. Figure~\ref{fig:overview} gives an overview of the benchmark, stage separation, and claim boundary that organize the rest of the paper.
 
 The theoretical lens for this design comes from Haidt's Social Intuitionist Model (SIM), which argues that moral judgment is often driven by relatively immediate intuition while explicit reasoning frequently serves a post-hoc justificatory role \cite{haidt2001}. We use SIM operationally rather than ontologically. The paper does \emph{not} claim that LLMs literally have human intuitions, emotions, or socially grounded justifications. Instead, SIM provides a useful decomposition of observable output into stages that may respond differently to prompting: a first-pass exposed judgment, a later explanation, and a possible re-judgment after explanation.
 
 Christian framing is a useful probe because it naturally foregrounds the moral status of motive, heart, and inner posture. That makes it a plausible candidate for moving first-pass exposed \texttt{heart\_worse} judgments if the frame genuinely penetrates evaluation before explanation. At the same time, Christian wording may be especially effective as a rhetorical resource for post-hoc explanation. A model can leave \texttt{J1} unchanged and still redescribe the same choice in terms of heart, selfishness, temptation, or character. To separate these possibilities, we compare Christian framing not only to baseline but also to a matched secular motive-focused control. This matched secular motive-focused control is crucial for distinguishing specifically Christian wording from generic motive salience.
 
-We therefore build a staged benchmark from everyday Moral Stories scenarios \cite{emelin2021moral} rather than trolley-style dilemmas. Each item is converted into a contrastive A/B vignette and elicited in three stages: \texttt{J1}, a first-pass forced-choice judgment with no explanation; \texttt{E}, a structured explanation explicitly tied to the model's earlier \texttt{J1}; and \texttt{J2}, a re-judgment after explanation. The five main conditions are \texttt{baseline}, \texttt{secular\_pre}, \texttt{christian\_pre}, \texttt{secular\_post}, and \texttt{christian\_post}, plus a \texttt{judgment-only} sanity subset. By design, \texttt{christian\_post} is especially diagnostic: if explanation changes there while \texttt{J1} is fixed by timing, the prompt is acting at the explanation layer rather than the first-pass judgment layer.
+We therefore build a staged benchmark from everyday Moral Stories scenarios \cite{emelin2021moral} rather than trolley-style dilemmas. Each item is converted into a contrastive A/B vignette and elicited in three stages: \texttt{J1}, a first-pass forced-choice judgment with no explanation; \texttt{E}, a structured explanation explicitly tied to the model's earlier \texttt{J1}; and \texttt{J2}, a re-judgment after explanation. The five main conditions are \texttt{baseline}, \texttt{secular\_pre}, \texttt{christian\_pre}, \texttt{secular\_post}, and \texttt{christian\_post}, plus a \texttt{judgment-only baseline} sanity subset (internal key: \texttt{baseline\_judgment\_only}). By design, \texttt{christian\_post} is especially diagnostic: if explanation changes there while \texttt{J1} is fixed by timing, the prompt is acting at the explanation layer rather than the first-pass judgment layer.
 
 The completed evidence supports stage dissociation more strongly than a robust Christian-specific advantage claim. On \texttt{qwen2.5:7b-instruct}, Christian pre-framing produces a modest direct Christian-minus-secular first-pass heart contrast of +1.67 percentage points, while act-level first-pass movement remains near zero. Relative to baseline, explanation language is more prompt-sensitive than first-pass exposed judgment, but direct Christian-versus-secular explanation contrasts weaken or disappear once matched-control comparison and lexical-echo control are applied. The smaller same-family model, \texttt{qwen2.5:0.5b-instruct}, attenuates the Christian-specific story further: the first-pass Christian-minus-secular heart contrast disappears and the controlled explanation contrast becomes small and unstable.
 
@@ -109,7 +109,7 @@ Condition & Frame timing & Stage order & Main interpretation \\
 \texttt{christian\_pre} & before \texttt{J1} & \texttt{C $\rightarrow$ J1 $\rightarrow$ E $\rightarrow$ J2} & Christian-over-secular first-pass test \\
 \texttt{secular\_post} & after \texttt{J1} & \texttt{J1 $\rightarrow$ S $\rightarrow$ E $\rightarrow$ J2} & post-hoc motive-salience control \\
 \texttt{christian\_post} & after \texttt{J1} & \texttt{J1 $\rightarrow$ C $\rightarrow$ E $\rightarrow$ J2} & post-hoc Christian framing test \\
-\texttt{judgment-only} & none & \texttt{J1 only} & sanity check for first-pass stability \\
+\texttt{judgment-only baseline} & none & \texttt{J1 only} & sanity check for first-pass stability \\
 \bottomrule
 \end{tabular}
 \caption{Condition matrix for the staged evaluation design. The post-\texttt{J1} conditions are especially diagnostic because they can affect explanation without changing the timing of first-pass exposed judgment.}
@@ -120,14 +120,14 @@ Condition & Frame timing & Stage order & Main interpretation \\
 
 \subsection{Models, Decoding, and Evidence Base}
 
-The completed confirmatory evidence base consists of two selected-v2 runs:
+The completed confirmatory evidence base is stored in two selected-v2 analysis files:
 \begin{itemize}
   \item \texttt{qwen2.5:7b-instruct} on the locked 120-item eval split,
   \item \texttt{qwen2.5:0.5b-instruct} on the same locked 120-item eval split,
-  \item plus a 40-item \texttt{judgment-only} sanity subset for each model.
+  \item plus a 40-item \texttt{judgment-only baseline} sanity subset for each model.
 \end{itemize}
 
-Decoding was deterministic with temperature 0.0, fixed seed 42, and separate token caps for judgment and explanation stages. The completed runs use the selected frame variants only. The paraphrase-family audit infrastructure exists in code, but no full family-audit rows are included in the current confirmatory results and none are promoted into the paper's substantive claims.
+Decoding was deterministic with temperature 0.0, fixed seed 42, \texttt{max\_judgment\_tokens}=80, and \texttt{max\_explanation\_tokens}=100. The completed runs use the selected frame variants only. The active 7B selected-v2 file is a metadata-normalized export of the locked raw 7B run, preserving decoded outputs while backfilling the current schema fields; Appendix~G documents this explicitly. The paraphrase-family audit infrastructure exists in code, but no full family-audit rows are included in the current confirmatory results and none are promoted into the paper's substantive claims.
 
 \subsection{Metric Definitions}
 
@@ -227,7 +227,7 @@ The main matched-control contrasts are:
 
 \subsection{Sanity and Setup Validation}
 
-Both completed Qwen analyses passed the core sanity check. Agreement between the staged baseline and the one-shot \texttt{judgment-only} baseline was perfect for both models: 1.0 act agreement and 1.0 heart agreement on the 40-item sanity subset. This matters because the central mechanism claim depends on treating \texttt{J1} as a stable first-pass exposed judgment measure rather than an artifact of the staged interface.
+Both completed Qwen analyses passed the core sanity check. Agreement between the staged baseline and the one-shot \texttt{judgment-only baseline} was perfect for both models: 1.0 act agreement and 1.0 heart agreement on the 40-item sanity subset. This matters because the central mechanism claim depends on treating \texttt{J1} as a stable first-pass exposed judgment measure rather than an artifact of the staged interface.
 
 \begin{table}[t]
 \centering
@@ -267,7 +267,7 @@ The same-family smaller model attenuates this story rather than strengthening it
 
 \subsection{Explanation-Layer Movement Relative to Baseline}
 
-The second main result is that explanation language is more prompt-sensitive than first-pass exposed judgment relative to baseline. This is true in both models, although the completed 7B run is the clearest case.
+The second main result is that explanation language is more prompt-sensitive than first-pass exposed judgment relative to baseline. This pattern appears in both models, but the completed 7B run is the clearest case and the one that most cleanly shows explanation movement without a stable Christian-specific residual.
 
 In 7B, the coarse explanation label already starts high at baseline: the model selects \texttt{motive/heart} on 89.17\% of items. Every framed condition pushes this coarse label to 100\%, producing a +10.83 point increase relative to baseline. Because that increase appears for both secular and Christian framing, the coarse label does not support a uniquely Christian effect. The more diagnostic layer is lexical and semantic content.
 
@@ -330,7 +330,7 @@ The heterogeneity analysis is exploratory and should not be read as a confirmato
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.98\linewidth]{figures/heterogeneity_effects.png}
-\caption{Exploratory heterogeneity by item type. Labels include per-category item counts from the locked eval split, and the figure is used only to probe where motive-sensitive effects may concentrate, not to claim confirmed category-level effects. The scale comparison again looks more like attenuation and instability than robustness success.}
+\caption{Exploratory heterogeneity by item type. Labels include per-category item counts from the locked eval split, and the figure is used only to probe where motive-sensitive effects may concentrate, not to claim confirmed category-level effects. The cross-scale pattern remains attenuated and unstable rather than consistent.}
 \label{fig:heterogeneity}
 \end{figure}
 
@@ -344,7 +344,7 @@ The strongest supported contribution of the paper is mechanism separation. The s
 
 This has two implications. First, the results argue against naive readings of bundled judgment-plus-rationale outputs. A prompt can change explanation language substantially relative to baseline while leaving first-pass exposed choice largely stable. If evaluation collapses these layers into one score, explanation-layer movement can be misread as deeper judgment change. Second, the matched-control comparison shows why baseline-only framing results can overstate Christian-specific effects. Once Christian framing is compared directly with a matched secular motive-focused control, the explanation advantage weakens or disappears, especially after lexical echo is controlled.
 
-The most plausible reading of the completed evidence is therefore not ``judgment rewrite'' and not a robust uniquely Christian semantic advantage. It is stage dissociation with at least partial rhetorical mediation. In 7B, Christian framing does preserve a modest first-pass heart-level increment over the matched secular control. But the explanation layer is where prompting remains most labile, and the direct Christian-versus-secular explanation contrast does not stay positive under the stricter comparison. The smaller 0.5B model narrows the story further, which suggests that even the modest 7B Christian-specific first-pass effect is scale-sensitive rather than robust within the family.
+The most plausible reading of the completed evidence is therefore not ``judgment rewrite'' and not a robust uniquely Christian semantic advantage. It is stage dissociation with explanation-layer rhetorical uptake and little evidence for a stable Christian-specific residual. In 7B, Christian framing does preserve a modest first-pass heart-level increment over the matched secular control. But the explanation layer is where prompting remains most labile, and the direct Christian-versus-secular explanation contrast does not stay positive under the stricter comparison. The smaller 0.5B model narrows the story further, which suggests that even the modest 7B Christian-specific first-pass effect is scale-sensitive rather than robust within the family.
 
 More broadly, the paper contributes a practical lesson for ML/NLP evaluation. Prompting effects in moral tasks should not be interpreted only at the level of aggregate answer quality or rhetorical plausibility. A staged design can reveal whether the prompt changed first-pass exposed judgment, post-hoc explanation, or neither. In the present study, that distinction is more robust than any claim about Christian-specific superiority.
 
@@ -477,7 +477,7 @@ Return JSON with exactly these keys:
   \item \textbf{\texttt{christian\_pre}}: system prompt $\rightarrow$ pre-\texttt{J1} Christian frame wrapper $\rightarrow$ \texttt{J1} $\rightarrow$ \texttt{E} $\rightarrow$ \texttt{J2}.
   \item \textbf{\texttt{secular\_post}}: system prompt $\rightarrow$ \texttt{J1} $\rightarrow$ post-\texttt{J1} secular frame wrapper $\rightarrow$ \texttt{E} $\rightarrow$ \texttt{J2}.
   \item \textbf{\texttt{christian\_post}}: system prompt $\rightarrow$ \texttt{J1} $\rightarrow$ post-\texttt{J1} Christian frame wrapper $\rightarrow$ \texttt{E} $\rightarrow$ \texttt{J2}.
-  \item \textbf{\texttt{judgment-only}}: system prompt $\rightarrow$ \texttt{J1} only. No frame text, no explanation stage, no \texttt{J2}.
+  \item \textbf{\texttt{judgment-only baseline}} (internal key \texttt{baseline\_judgment\_only}): system prompt $\rightarrow$ \texttt{J1} only. No frame text, no explanation stage, no \texttt{J2}.
 \end{itemize}
 
 The key identification feature is timing. The post-\texttt{J1} conditions cannot change the timing of first-pass exposed judgment by construction, so any shift there is interpreted at the explanation or revision layer rather than the first-pass layer.
@@ -577,7 +577,8 @@ Detected lexical echo terms: none. Detected non-echo semantic terms: \texttt{sel
 
 \section{Statistical Reporting}
 
-\begin{longtable}{p{0.16\linewidth} p{0.27\linewidth} p{0.19\linewidth} p{0.08\linewidth} p{0.08\linewidth} p{0.16\linewidth}}
+\footnotesize
+\begin{longtable}{@{}p{0.13\linewidth} p{0.25\linewidth} p{0.17\linewidth} p{0.07\linewidth} p{0.07\linewidth} p{0.19\linewidth}@{}}
 \caption{Full direct matched-control contrasts for the completed selected-v2 runs. Estimates are Christian minus the matched secular motive-focused control in percentage-point units.} \\
 \toprule
 Model & Contrast & Estimate [95\% CI] & $p$ & $d_z$ & Note \\
@@ -609,6 +610,7 @@ Qwen 2.5 0.5B & C-post $-$ S-post act revision & +0.00 pp [+0.00, +0.00] & 1.000
 Qwen 2.5 0.5B & C-post $-$ S-post heart revision & +0.00 pp [+0.00, +0.00] & 1.000 & 0.00 & No revision difference. \\
 \bottomrule
 \end{longtable}
+\normalsize
 
 \noindent\textbf{Note.} The lexical-control survival ratio is not reported numerically because there is no positive raw Christian-post advantage to summarize in either completed model.
 
@@ -702,7 +704,12 @@ The current analysis manifests do not record execution timestamps, so run dates 
 
 \paragraph{Output schema.}
 Each result row records:
-\texttt{model, split, run\_id, condition, item\_id, seed, temperature, max\_judgment\_tokens, max\_explanation\_tokens, frame\_mode, frame\_family, frame\_variant\_id, frame\_position, frames\_config\_version, j1\_act, j1\_heart, e\_focus, e\_text, j2\_act, j2\_heart, raw\_trace}.
+\begin{verbatim}
+model, split, run_id, condition, item_id, seed, temperature,
+max_judgment_tokens, max_explanation_tokens, frame_mode, frame_family,
+frame_variant_id, frame_position, frames_config_version,
+j1_act, j1_heart, e_focus, e_text, j2_act, j2_heart, raw_trace
+\end{verbatim}
 
 \paragraph{Key result files.}
 \begin{itemize}
@@ -821,7 +828,7 @@ Data slice: first-pass heart shift versus controlled explanation shift for the f
 Data slice: condition-level act and heart revision rates from \texttt{J1} to \texttt{J2}. Infer: revision is rare and secondary. Do not infer: substantial downstream judgment rewriting.
 
 \subsection{Figure 5}
-Data slice: the two main matched-control contrasts, pre-heart and post controlled explanation. Infer: attenuation across scale within Qwen. Do not infer: stable robustness success for a Christian-specific effect.
+Data slice: the two main matched-control contrasts, pre-heart and post controlled explanation. Infer: attenuation across scale within Qwen. Do not infer: a stable Christian-specific effect across model size.
 
 \subsection{Figure 6}
 Data slice: exploratory heterogeneity by primary tension tag. Infer: where motive-sensitive effects might concentrate. Do not infer: confirmed category-level findings.

@@ -2,8 +2,8 @@
 
 The canonical full manuscript is now:
 
-- `/Users/hanzhenzhu/Desktop/Christian_Social_intuition/paper/main.tex`
-- `/Users/hanzhenzhu/Desktop/Christian_Social_intuition/paper/main.pdf`
+- `../paper/main.tex`
+- `../paper/main.pdf`
 
 The final calibrated paper makes one clean claim throughout:
 
@@ -36,10 +36,10 @@ The final calibrated paper makes one clean claim throughout:
 
 ## Companion materials
 
-- Final revision checklist: `/Users/hanzhenzhu/Desktop/Christian_Social_intuition/docs/final_revision/revision_checklist.md`
-- Main-text stats table: `/Users/hanzhenzhu/Desktop/Christian_Social_intuition/docs/final_revision/main_text_stats_table.md`
-- Appendix stats table: `/Users/hanzhenzhu/Desktop/Christian_Social_intuition/docs/final_revision/appendix_stats_table.md`
-- Reviewer-risk memo: `/Users/hanzhenzhu/Desktop/Christian_Social_intuition/docs/final_revision/reviewer_risk_memo_final.md`
+- Final revision checklist: `final_revision/revision_checklist.md`
+- Main-text stats table: `final_revision/main_text_stats_table.md`
+- Appendix stats table: `final_revision/appendix_stats_table.md`
+- Reviewer-risk memo: `final_revision/reviewer_risk_memo_final.md`
 
 中文提示：
 - `paper_draft.md` 现在不再维护一份独立长稿，而是明确把 `paper/main.tex` 作为 canonical manuscript。

@@ -15,7 +15,7 @@ This project uses Moral Stories as the source benchmark, but the experiment requ
 1. Rebuilt the candidate pool after adding text cleanup for quoted actions and several dataset typos.
 2. Excluded scenarios with explicit religious lexical content such as `Christian`, `church`, `Bible`, `pastor`, `prayer`, and `Satanism` to avoid treatment-content contamination in a Christian-framing experiment.
 3. Rebalanced option order so the candidate pool is exactly `75/75` on the location of the moral option, and the locked splits are exactly `15/15` for dev and `60/60` for eval.
-4. Completed the review sheet at [item_review_v1.csv](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/data/processed/item_review_v1.csv) with `manual_accept` filled for all `150` rows.
+4. Completed the review sheet at [item_review_v1.csv](../data/processed/item_review_v1.csv) with `manual_accept` filled for all `150` rows.
 5. Applied `16` manual tag overrides where the heuristic tagger clearly mismatched the item’s main diagnostic tension.
 
 ## Final Counts

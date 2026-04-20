@@ -263,6 +263,7 @@ def build_candidate_items(
     *,
     seed: int = 42,
 ) -> list[ItemRecord]:
+    """Convert raw Moral Stories rows into contrastive A/B candidate items with heuristic tags."""
     rng = random.Random(seed)
     items: list[ItemRecord] = []
     for record in stories:
@@ -318,6 +319,7 @@ def select_candidate_pool(
     *,
     limit: int = 150,
 ) -> list[ItemRecord]:
+    """Select the candidate pool that will be manually reviewed before locking splits."""
     target_per_tag = math.ceil(limit / len(TENSION_TAGS))
     grouped: dict[str, list[ItemRecord]] = defaultdict(list)
     for item in sorted(items, key=lambda row: row.heuristic_score, reverse=True):
@@ -354,6 +356,7 @@ def stratified_split(
     eval_size: int = 120,
     seed: int = 42,
 ) -> tuple[list[ItemRecord], list[ItemRecord]]:
+    """Create the provisional dev/eval split with simple tag stratification and option rebalance."""
     rng = random.Random(seed)
     grouped: dict[str, list[ItemRecord]] = defaultdict(list)
     for item in items:
@@ -445,6 +448,7 @@ def apply_review_overrides(
     eval_size: int = 120,
     seed: int = 42,
 ) -> dict[str, Path]:
+    """Apply accept/reject and tag overrides from the review sheet to produce locked splits."""
     by_id: dict[str, ItemRecord] = {}
     with Path(candidate_path).open("r", encoding="utf-8") as handle:
         for line in handle:
@@ -514,6 +518,7 @@ def build_and_export_items(
     eval_size: int = 120,
     seed: int = 42,
 ) -> dict[str, Path]:
+    """Run the full public item-construction pipeline from raw data to draft splits plus review CSV."""
     stories = load_moral_stories(raw_path)
     candidates = build_candidate_items(stories, seed=seed)
     selected = select_candidate_pool(candidates, limit=candidate_limit)

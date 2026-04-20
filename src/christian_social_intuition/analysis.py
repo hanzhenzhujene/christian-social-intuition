@@ -15,6 +15,7 @@ import statsmodels.formula.api as smf
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from matplotlib.ticker import PercentFormatter
+from PIL import Image
 
 from .paired_stats import cohens_dz, paired_bootstrap_ci, paired_mean, sign_flip_permutation_test
 from .parsing import parse_explanation_text, parse_judgment_text
@@ -118,6 +119,17 @@ def _style_axis(ax: plt.Axes, *, grid_axis: str = "y") -> None:
 def _add_pre_post_bands(ax: plt.Axes, *, pre: tuple[float, float], post: tuple[float, float]) -> None:
     ax.axhspan(pre[0], pre[1], color="#F4F8FC", alpha=0.95, zorder=0)
     ax.axhspan(post[0], post[1], color="#FFF6EE", alpha=0.95, zorder=0)
+
+
+def _save_release_png(fig: plt.Figure, output_path: str | Path) -> Path:
+    """Save a figure as a paper-safe RGB PNG for downstream LaTeX compilation."""
+    out = Path(output_path)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
+    with Image.open(out) as image:
+        if image.mode != "RGB":
+            image.convert("RGB").save(out)
+    return out
 
 
 def _format_pct_text(value: float) -> str:
@@ -230,6 +242,7 @@ def _format_p_value(value: float) -> str:
 
 
 def load_results(paths: str | Path | Iterable[str | Path]) -> pd.DataFrame:
+    """Load one or more JSONL result files and backfill parsed fields from raw traces if needed."""
     if isinstance(paths, (str, Path)):
         path_list = [paths]
     else:
@@ -271,6 +284,7 @@ def load_annotation(path: str | Path) -> pd.DataFrame:
 
 
 def build_annotation_sheet(results_df: pd.DataFrame) -> pd.DataFrame:
+    """Create the coder-facing CSV used for pending explanation annotation."""
     sheet = _ensure_frame_columns(results_df)
     sheet = sheet[sheet["condition"] != SANITY_CONDITION].copy()
     sheet["consistency_score"] = ""
@@ -307,6 +321,7 @@ def enrich_results(
     annotation_df: pd.DataFrame | None = None,
     item_df: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
+    """Attach lexical metrics, item metadata, and optional human-coded fields to raw results."""
     working = _filter_frame_mode(results_df, "selected")
     working = _join_item_metadata(working, item_df)
     lexicons = lexicons or {}
@@ -359,6 +374,7 @@ def enrich_results(
 
 
 def build_condition_pairs(results_df: pd.DataFrame, *, item_df: pd.DataFrame | None = None, lexicons: dict | None = None) -> pd.DataFrame:
+    """Join each non-baseline condition to its baseline row for item-level paired analyses."""
     working = enrich_results(results_df, lexicons=lexicons, item_df=item_df)
     baseline = working[working["condition"] == "baseline"].copy()
     baseline_cols = [
@@ -444,6 +460,7 @@ def compute_condition_summary(
     bootstrap_samples: int = 1000,
     bootstrap_seed: int = 42,
 ) -> pd.DataFrame:
+    """Summarize baseline-relative movement and revision rates for every released condition."""
     working = enrich_results(results_df, lexicons=lexicons, annotation_df=annotation_df, item_df=item_df)
     paired = build_condition_pairs(results_df, item_df=item_df, lexicons=lexicons)
     rows: list[dict] = []
@@ -541,6 +558,7 @@ def compute_condition_summary(
 
 
 def compute_sanity_agreement(results_df: pd.DataFrame) -> pd.DataFrame:
+    """Measure agreement between staged baseline J1 and the judgment-only baseline subset."""
     working = _filter_frame_mode(results_df, "selected")
     baseline = working[working["condition"] == "baseline"][["model", "item_id", "j1_act", "j1_heart"]].copy()
     sanity = working[working["condition"] == SANITY_CONDITION][["model", "item_id", "j1_act", "j1_heart"]].copy()
@@ -587,6 +605,7 @@ def compute_direct_control_contrasts(
     bootstrap_seed: int = 42,
     permutation_samples: int = 5000,
 ) -> pd.DataFrame:
+    """Compute paired Christian-versus-secular contrasts with CIs, p-values, and effect sizes."""
     pairs = build_condition_pairs(results_df, item_df=item_df, lexicons=lexicons)
     specs = [
         {
@@ -749,6 +768,7 @@ def compute_direct_control_contrasts(
 
 
 def build_main_text_direct_contrasts(direct_contrasts_df: pd.DataFrame) -> pd.DataFrame:
+    """Collapse the full direct-contrast table into the six paper headline rows."""
     if direct_contrasts_df.empty:
         return pd.DataFrame(
             columns=[
@@ -805,6 +825,7 @@ def build_main_text_direct_contrasts(direct_contrasts_df: pd.DataFrame) -> pd.Da
 
 
 def build_appendix_direct_contrasts(direct_contrasts_df: pd.DataFrame) -> pd.DataFrame:
+    """Format the full direct-contrast table for appendix export."""
     if direct_contrasts_df.empty:
         return pd.DataFrame()
     appendix = direct_contrasts_df[
@@ -827,6 +848,7 @@ def select_qualitative_examples(
     item_df: pd.DataFrame | None,
     lexicons: dict | None = None,
 ) -> pd.DataFrame:
+    """Select deterministic illustrative examples for the appendix and release notes."""
     working = enrich_results(results_df, lexicons=lexicons, item_df=item_df)
     working = working[working["model"] == "qwen2.5:7b-instruct"].copy()
     if working.empty:
@@ -943,6 +965,7 @@ def select_qualitative_examples(
 
 
 def build_figure_notes() -> str:
+    """Return the interpretation notes shipped with the released paper figures."""
     return "\n".join(
         [
             "# Figure Notes",
@@ -988,6 +1011,7 @@ def build_figure_notes() -> str:
 
 
 def compute_causal_contrasts(summary_df: pd.DataFrame) -> pd.DataFrame:
+    """Extract a compact contrast table from the broader condition summary frame."""
     rows = []
     for model in sorted(summary_df["model"].dropna().unique(), key=_model_sort_key):
         model_df = summary_df[summary_df["model"] == model].set_index("condition")
@@ -1026,6 +1050,7 @@ def compute_causal_contrasts(summary_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def compute_revision_summary(results_df: pd.DataFrame, *, item_df: pd.DataFrame | None = None, lexicons: dict | None = None) -> pd.DataFrame:
+    """Summarize J1-to-J2 revision rates, directions, and toward/away-moral-option movement."""
     pairs = build_condition_pairs(results_df, item_df=item_df, lexicons=lexicons)
     rows = []
     for model in sorted(pairs["model"].dropna().unique(), key=_model_sort_key):
@@ -1095,6 +1120,7 @@ def compute_heterogeneity_summary(
     bootstrap_samples: int = 1000,
     bootstrap_seed: int = 42,
 ) -> pd.DataFrame:
+    """Estimate exploratory direct contrasts within each locked primary tension tag."""
     if item_df is None or item_df.empty:
         return pd.DataFrame(
             columns=["model", "primary_tension_tag", "contrast", "n_items", "estimate", "ci_low", "ci_high"]
@@ -1151,6 +1177,7 @@ def compute_family_audit_summary(
     bootstrap_samples: int = 1000,
     bootstrap_seed: int = 42,
 ) -> pd.DataFrame:
+    """Aggregate paraphrase-family audit rows when those runs are present in the input data."""
     audit_rows = _filter_frame_mode(results_df, "family_audit")
     if audit_rows.empty:
         return pd.DataFrame(
@@ -1225,6 +1252,7 @@ def compute_family_audit_summary(
 
 
 def compute_mixed_effects(paired_df: pd.DataFrame) -> pd.DataFrame:
+    """Run lightweight mixed-effects confirmation models on the paired item frame."""
     if paired_df.empty:
         return pd.DataFrame(
             columns=["model", "metric", "term", "coef", "std_err", "z_or_t", "pvalue", "converged", "notes"]
@@ -1314,6 +1342,7 @@ def compute_mixed_effects(paired_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def plot_first_pass_shift(summary_df: pd.DataFrame, output_path: str | Path) -> Path:
+    """Render the released figure comparing first-pass act and heart shift rates."""
     plot_df = summary_df[summary_df["condition"].isin({"secular_pre", "christian_pre", "secular_post", "christian_post"})].copy()
     models = sorted(plot_df["model"].dropna().unique(), key=_model_sort_key)
     fig, axes = plt.subplots(1, len(models), figsize=(12.6, 5.7), sharey=True, sharex=True)
@@ -1436,14 +1465,13 @@ def plot_first_pass_shift(summary_df: pd.DataFrame, output_path: str | Path) -> 
     fig.legend(handles=handles, frameon=False, loc="upper center", bbox_to_anchor=(0.5, 0.03), ncol=3)
     fig.tight_layout()
     fig.subplots_adjust(top=0.84, bottom=0.17)
-    out = Path(output_path)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out, dpi=300, bbox_inches="tight")
+    out = _save_release_png(fig, output_path)
     plt.close(fig)
     return out
 
 
 def plot_explanation_layer_effect(summary_df: pd.DataFrame, output_path: str | Path) -> Path:
+    """Render the released figure for coarse, raw, and lexical-controlled explanation movement."""
     plot_df = summary_df[summary_df["condition"].isin({"secular_pre", "christian_pre", "secular_post", "christian_post"})].copy()
     plot_df["order"] = plot_df["condition"].map(_condition_sort_key)
     plot_df = plot_df.sort_values(["model", "order"], key=lambda s: s.map(_model_sort_key) if s.name == "model" else s)
@@ -1542,7 +1570,7 @@ def plot_explanation_layer_effect(summary_df: pd.DataFrame, output_path: str | P
         Line2D([0], [0], marker="D", color=FRAME_COLORS["christian"], markeredgecolor="#6C3B14", label="Christian frame", markersize=6.8, linestyle=""),
         Line2D([0, 1], [0, 0], color="#C5CBD4", linewidth=2.2, label="Within-timing comparison"),
     ]
-    fig.suptitle("Explanation outputs move readily, but Christian-specific residuals are not stable", x=0.06, ha="left", fontweight="bold")
+    fig.suptitle("Explanation movement is clear, but matched-control residuals remain weak", x=0.06, ha="left", fontweight="bold")
     fig.text(
         0.06,
         0.95,
@@ -1553,14 +1581,13 @@ def plot_explanation_layer_effect(summary_df: pd.DataFrame, output_path: str | P
     fig.legend(handles=handles, frameon=False, loc="upper center", bbox_to_anchor=(0.5, 0.03), ncol=3)
     fig.tight_layout()
     fig.subplots_adjust(top=0.9, bottom=0.12)
-    out = Path(output_path)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out, dpi=300, bbox_inches="tight")
+    out = _save_release_png(fig, output_path)
     plt.close(fig)
     return out
 
 
 def plot_judgment_explanation_dissociation(summary_df: pd.DataFrame, output_path: str | Path) -> Path:
+    """Plot explanation movement against first-pass movement to visualize stage dissociation."""
     plot_df = summary_df[summary_df["condition"].isin({"secular_pre", "christian_pre", "secular_post", "christian_post"})].copy()
     y_metric = (
         "semantic_score_controlled_delta_vs_baseline"
@@ -1631,14 +1658,13 @@ def plot_judgment_explanation_dissociation(summary_df: pd.DataFrame, output_path
     fig.legend(handles=handles, frameon=False, loc="upper center", bbox_to_anchor=(0.5, 0.03), ncol=4)
     fig.tight_layout()
     fig.subplots_adjust(top=0.84, bottom=0.18)
-    out = Path(output_path)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out, dpi=300, bbox_inches="tight")
+    out = _save_release_png(fig, output_path)
     plt.close(fig)
     return out
 
 
 def plot_revision_figure(revision_df: pd.DataFrame, output_path: str | Path) -> Path:
+    """Render the released J1-to-J2 revision figure with low-area lollipop marks."""
     plot_df = revision_df[revision_df["condition"].isin(CONDITION_ORDER)].copy()
     models = sorted(plot_df["model"].dropna().unique(), key=_model_sort_key)
     fig, axes = plt.subplots(2, len(models), figsize=(12.8, 7.6), sharex=True, sharey="row")
@@ -1680,24 +1706,23 @@ def plot_revision_figure(revision_df: pd.DataFrame, output_path: str | Path) -> 
                 ax.set_xlabel("Revision rate")
             _style_axis(ax, grid_axis="x")
 
-    fig.suptitle("J1-to-J2 revision is rare and remains a secondary mechanism check", x=0.06, ha="left", fontweight="bold")
+    fig.suptitle("J1-to-J2 revision remains rare", x=0.06, ha="left", fontweight="bold")
     fig.text(
         0.06,
         0.93,
-        "The plot is designed to show scarcity rather than volume: most revision rates stay close to zero even when explanation language moves.",
+        "Revision is treated as a secondary mechanism check rather than a primary estimand: most rates stay close to zero even when explanation language moves.",
         fontsize=9,
         color="#4E4E4E",
     )
     fig.tight_layout()
     fig.subplots_adjust(top=0.88)
-    out = Path(output_path)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out, dpi=300, bbox_inches="tight")
+    out = _save_release_png(fig, output_path)
     plt.close(fig)
     return out
 
 
 def plot_heterogeneity(heterogeneity_df: pd.DataFrame, output_path: str | Path) -> Path:
+    """Render the exploratory heterogeneity figure across the locked item categories."""
     if heterogeneity_df.empty:
         raise ValueError("No heterogeneity results available.")
     metrics = [
@@ -1746,18 +1771,17 @@ def plot_heterogeneity(heterogeneity_df: pd.DataFrame, output_path: str | Path) 
         Line2D([0], [0], marker="o", color="none", markerfacecolor=model_colors["qwen2.5:7b-instruct"], markeredgecolor=model_colors["qwen2.5:7b-instruct"], label="Qwen 2.5 7B", markersize=6),
         Line2D([0], [0], marker="s", color="none", markerfacecolor=model_colors["qwen2.5:0.5b-instruct"], markeredgecolor=model_colors["qwen2.5:0.5b-instruct"], label="Qwen 2.5 0.5B", markersize=6),
     ]
-    fig.suptitle("Exploratory heterogeneity probes where motive-sensitive effects may concentrate", x=0.06, ha="left", fontweight="bold")
+    fig.suptitle("Exploratory heterogeneity by item type", x=0.06, ha="left", fontweight="bold")
     fig.legend(handles=handles, frameon=False, loc="upper center", bbox_to_anchor=(0.5, 0.03), ncol=2)
     fig.tight_layout()
     fig.subplots_adjust(top=0.85, bottom=0.18)
-    out = Path(output_path)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out, dpi=300, bbox_inches="tight")
+    out = _save_release_png(fig, output_path)
     plt.close(fig)
     return out
 
 
 def plot_cross_model_comparison(direct_contrasts_df: pd.DataFrame, output_path: str | Path) -> Path:
+    """Render the same-family cross-model comparison for the two key matched-control contrasts."""
     if "contrast" not in direct_contrasts_df.columns:
         direct_contrasts_df = compute_causal_contrasts(direct_contrasts_df)
         direct_contrasts_df["contrast"] = direct_contrasts_df["contrast"].replace(
@@ -1828,19 +1852,17 @@ def plot_cross_model_comparison(direct_contrasts_df: pd.DataFrame, output_path: 
         ax.set_xlabel("Model size")
         _style_axis(ax, grid_axis="y")
     axes[0].set_ylabel("Christian - secular paired estimate")
-    fig.suptitle("Same-family scale comparison shows attenuation rather than robustness success", x=0.06, ha="left", fontweight="bold")
+    fig.suptitle("Same-family scale comparison highlights attenuation across Qwen size", x=0.06, ha="left", fontweight="bold")
     fig.text(
         0.06,
         0.92,
-        "Each panel connects the same contrast across Qwen sizes, making attenuation or sign instability visible at a glance.",
+        "Each panel connects the same matched-control contrast across Qwen sizes, making attenuation and sign instability visible at a glance.",
         fontsize=9,
         color="#4E4E4E",
     )
     fig.tight_layout()
     fig.subplots_adjust(top=0.84)
-    out = Path(output_path)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out, dpi=300, bbox_inches="tight")
+    out = _save_release_png(fig, output_path)
     plt.close(fig)
     return out
 
@@ -1856,6 +1878,7 @@ def write_analysis_report(
     family_audit_df: pd.DataFrame | None = None,
     output_path: str | Path,
 ) -> Path:
+    """Write the compact markdown analysis report shipped with each released analysis bundle."""
     out = Path(output_path)
     out.parent.mkdir(parents=True, exist_ok=True)
     lines = [

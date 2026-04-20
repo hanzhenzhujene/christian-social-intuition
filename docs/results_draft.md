@@ -1,6 +1,6 @@
 # Results Draft
 
-The sanity check passed cleanly. Both completed Qwen runs achieve `1.0 / 1.0` agreement between the staged baseline and the `judgment_only` baseline on the 40-item sanity subset. This supports treating `J1` as a stable first-pass exposed judgment measure.
+The sanity check passed cleanly. Both completed Qwen runs achieve `1.0 / 1.0` agreement between the staged baseline and the `judgment-only baseline` on the 40-item sanity subset. This supports treating `J1` as a stable first-pass exposed judgment measure.
 
 For first-pass exposed judgment, the strongest Christian-over-secular effect is modest and limited to the main 7B model's heart judgment. In `qwen2.5:7b-instruct`, `christian_pre` shifts `J1` heart judgments on `9.17%` of items and `secular_pre` shifts them on `7.50%`, yielding a direct Christian-minus-secular contrast of `+1.67` percentage points with a bootstrap interval of `[0.00, 4.17]`, `p = 0.494`, and `dz = 0.13`. Act-level first-pass movement remains near zero. In `qwen2.5:0.5b-instruct`, the direct first-pass heart contrast disappears (`-0.83` points).
 

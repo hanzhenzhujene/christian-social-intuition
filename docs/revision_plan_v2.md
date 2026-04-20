@@ -26,7 +26,7 @@ Tighten the paper from a broad prompt-effect story into a reviewer-resistant mec
 - Added two frame modes:
   - `selected`
   - `family_audit`
-- Added variant-aware frame configuration and lexicon blocks in [frames.yaml](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/configs/frames.yaml)
+- Added variant-aware frame configuration and lexicon blocks in [frames.yaml](../configs/frames.yaml)
 - Added direct Christian-vs-secular paired contrasts with bootstrap confidence intervals, sign-flip permutation tests, effect sizes, and short interpretations.
 - Added lexical-echo-controlled explanation metrics:
   - `frame_echo_score`
@@ -53,9 +53,9 @@ That means the old paper framing was too strong. The cleaner current interpretat
 
 ## Current Compute Status
 
-- `qwen2.5:7b-instruct`: full locked eval re-analyzed under the new v2 pipeline at [qwen2.5_7b_instruct_eval_v2](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/outputs/analysis/qwen2.5_7b_instruct_eval_v2)
-- `qwen2.5:0.5b-instruct`: full selected-v2 rerun is complete at [qwen2.5_0.5b_instruct_eval_v2.jsonl](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/outputs/runs/qwen2.5_0.5b_instruct_eval_v2.jsonl)
-- `qwen2.5:0.5b-instruct`: family-audit smoke run completed and analysis exists at [qwen2.5_0.5b_instruct_smoke_family_audit_v2](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/outputs/analysis/qwen2.5_0.5b_instruct_smoke_family_audit_v2)
+- `qwen2.5:7b-instruct`: full locked eval re-analyzed under the new v2 pipeline at [qwen2.5_7b_instruct_eval_v2](../outputs/analysis/qwen2.5_7b_instruct_eval_v2)
+- `qwen2.5:0.5b-instruct`: full selected-v2 rerun is complete at [qwen2.5_0.5b_instruct_eval_v2.jsonl](../outputs/runs/qwen2.5_0.5b_instruct_eval_v2.jsonl)
+- `qwen2.5:0.5b-instruct`: family-audit smoke validation was completed locally during development, but those smoke artifacts are not part of the public release surface.
 
 ## Chinese Note
 

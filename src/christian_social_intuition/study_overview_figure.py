@@ -10,6 +10,7 @@ import pandas as pd
 from matplotlib.lines import Line2D
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 from matplotlib.ticker import PercentFormatter
+from PIL import Image
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -30,6 +31,16 @@ PALE_TEAL = "#EEF9F7"
 PALE_RED = "#FFF1F1"
 PALE_GOLD = "#FFF7E8"
 PALE_PURPLE = "#F3F2FC"
+
+
+def _save_release_png(fig: plt.Figure, output_path: Path) -> Path:
+    """Save the overview figure as an RGB PNG for reliable downstream paper builds."""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(output_path, dpi=300, bbox_inches="tight", facecolor="white")
+    with Image.open(output_path) as image:
+        if image.mode != "RGB":
+            image.convert("RGB").save(output_path)
+    return output_path
 
 
 def _card(ax, title: str, lines: list[str], *, fc: str, ec: str) -> None:
@@ -347,8 +358,7 @@ def build_study_overview_figure(output_path: Path = OUTPUT_PATH) -> Path:
         bbox={"boxstyle": "round,pad=0.55", "facecolor": "#F5F8FC", "edgecolor": BORDER, "linewidth": 1.2},
     )
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(output_path, dpi=300, bbox_inches="tight")
+    _save_release_png(fig, output_path)
     plt.close(fig)
     return output_path
 

@@ -6,7 +6,7 @@ The framing manipulation should isolate a heart-focused Christian cue from a sec
 
 ## Candidate Pool
 
-Candidate frames live in [frames.yaml](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/configs/frames.yaml) under `dev_candidates`. The selected pair is:
+Candidate frames live in [frames.yaml](../configs/frames.yaml) under `dev_candidates`. The selected pair is:
 
 - Christian: `Consider not only the outward act but the heart behind it. Attend to motive, inner posture, and what kind of person the choice expresses.`
 - Secular: `Consider not only the outward act but the underlying motive behind it. Attend to intention, inner posture, and what kind of person the choice expresses.`

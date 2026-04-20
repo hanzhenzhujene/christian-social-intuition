@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   pytest:
     name: Pytest
@@ -43,7 +46,7 @@ jobs:
         with:
           root_file: main.tex
           working_directory: paper
-          args: -interaction=nonstopmode -halt-on-error
+          args: -pdf -interaction=nonstopmode -halt-on-error
 
       - name: Upload compiled PDF
         uses: actions/upload-artifact@v4

@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.lines import Line2D
 from matplotlib.ticker import PercentFormatter
+from PIL import Image
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -23,6 +24,16 @@ def _load_tables() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFra
     q7_direct = pd.read_csv(Q7_DIR / "main_text_direct_contrasts.csv").set_index("contrast_label")
     q05_direct = pd.read_csv(Q05_DIR / "main_text_direct_contrasts.csv").set_index("contrast_label")
     return q7_summary, q05_summary, q7_direct, q05_direct
+
+
+def _save_release_png(fig: plt.Figure, output_path: Path) -> Path:
+    """Save the README figure as an RGB PNG that compiles reliably in LaTeX."""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(output_path, dpi=300, bbox_inches="tight", facecolor="white")
+    with Image.open(output_path) as image:
+        if image.mode != "RGB":
+            image.convert("RGB").save(output_path)
+    return output_path
 
 
 def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
@@ -79,7 +90,7 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
         color=colors["muted"],
     )
 
-    categories = ["J1 act", "J1 heart", "Explanation", "J1→J2 heart"]
+    categories = ["J1 act", "J1 heart", "Controlled\nexplanation", "J1→J2 heart"]
     q7_vals = np.array(
         [
             q7_summary.loc["christian_pre", "j1_act_shift_rate"],
@@ -104,7 +115,7 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
         ax_a.bar(x_val + width / 2, q05_vals[idx], width=width, color=category_color, alpha=0.35)
         ax_a.text(x_val - width / 2, q7_vals[idx] + 0.003, f"{q7_vals[idx] * 100:.1f}%", ha="center", va="bottom", fontsize=9.5)
         ax_a.text(x_val + width / 2, q05_vals[idx] + 0.003, f"{q05_vals[idx] * 100:.1f}%", ha="center", va="bottom", fontsize=9.5, color=colors["muted"])
-    ax_a.set_title("A. Relative to baseline, explanation movement is easiest to induce", loc="left", color=colors["title"], fontweight="bold", fontsize=11.8)
+    ax_a.set_title("A. Relative to baseline, explanation movement is largest", loc="left", color=colors["title"], fontweight="bold", fontsize=11.8)
     ax_a.set_xticks(x)
     ax_a.set_xticklabels(categories)
     ax_a.set_ylim(0, 0.115)
@@ -145,7 +156,7 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
         ax_b.scatter(est_7b, y + 0.12, color=colors["q7"], s=60, zorder=3, edgecolor="#4A1F30", linewidth=0.8)
         ax_b.plot([lo_05b, hi_05b], [y - 0.12, y - 0.12], color=colors["q05"], lw=2.2)
         ax_b.scatter(est_05b, y - 0.12, color=colors["q05"], s=60, zorder=3, edgecolor="#19504C", linewidth=0.8)
-    ax_b.set_title("B. Matched control makes the residual much smaller", loc="left", color=colors["title"], fontweight="bold", fontsize=11.8)
+    ax_b.set_title("B. Matched control shrinks the Christian-specific residual", loc="left", color=colors["title"], fontweight="bold", fontsize=11.8)
     ax_b.set_yticks(y_positions)
     ax_b.set_yticklabels([name for name, _ in contrast_order])
     ax_b.set_xlim(-0.16, 0.08)
@@ -199,7 +210,7 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
             linewidth=1.5,
         )
         ax_c.text(1.03, q05_est, label, color=color, va="center", fontsize=9.8)
-    ax_c.set_title("C. Scale comparison shows attenuation", loc="left", color=colors["title"], fontweight="bold", fontsize=11.8)
+    ax_c.set_title("C. Same-family scale comparison shows attenuation", loc="left", color=colors["title"], fontweight="bold", fontsize=11.8)
     ax_c.set_xticks(x_c)
     ax_c.set_xticklabels(["7B", "0.5B"])
     ax_c.set_ylim(-0.15, 0.08)
@@ -216,7 +227,7 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
     ax_footer.text(
         0.5,
         0.50,
-        "Takeaway: the strongest supported insight is stage dissociation. Explanation language moves readily relative to baseline, but the uniquely Christian-specific residual becomes modest, unstable, or null under matched control.",
+        "Takeaway: the strongest supported insight is stage dissociation. Explanation language moves readily relative to baseline, but the Christian-specific residual becomes modest, unstable, or null under matched control.",
         fontsize=12.2,
         fontweight="bold",
         color=colors["title"],
@@ -226,8 +237,7 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
         bbox={"boxstyle": "round,pad=0.58", "facecolor": "#F4F7FB", "edgecolor": "#D5DEE8", "linewidth": 1.0},
     )
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(output_path, dpi=300, bbox_inches="tight")
+    _save_release_png(fig, output_path)
     plt.close(fig)
     return output_path
 

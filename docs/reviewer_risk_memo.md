@@ -5,7 +5,7 @@
 ### 1. "You only compared prompt conditions to baseline, not to the matched secular control."
 
 Response:
-- The revised pipeline now reports direct Christian-vs-secular paired contrasts in [direct_control_contrasts.csv](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/outputs/analysis/qwen2.5_7b_instruct_eval_v2/direct_control_contrasts.csv).
+- The revised pipeline now reports direct Christian-vs-secular paired contrasts in [direct_control_contrasts.csv](../outputs/analysis/qwen2.5_7b_instruct_eval_v2/direct_control_contrasts.csv).
 - Every direct contrast includes:
   - paired item-level estimate
   - bootstrap confidence interval

@@ -330,71 +330,118 @@ def cmd_build_paper_figures(args: argparse.Namespace) -> None:
     print(f"Saved paper figures to {output_dir}")
 
 
+class _HelpFormatter(argparse.ArgumentDefaultsHelpFormatter, argparse.RawDescriptionHelpFormatter):
+    """Combine readable defaults with multiline workflow examples."""
+
+
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Christian framing x SIM experiment harness")
+    parser = argparse.ArgumentParser(
+        description=(
+            "Run data preparation, staged experiments, analysis, and figure generation\n"
+            "for the Christian Framing x Social Intuitionist Model benchmark."
+        ),
+        epilog=(
+            "Common workflows:\n"
+            "  csi-sim analyze-results --results outputs/runs/qwen2.5_7b_instruct_eval_v2.jsonl \\\n"
+            "    --frames-path configs/frames.yaml --output-dir outputs/analysis/qwen2.5_7b_instruct_eval_v2\n"
+            "  csi-sim build-paper-figures --analysis-dirs outputs/analysis/qwen2.5_7b_instruct_eval_v2 \\\n"
+            "    outputs/analysis/qwen2.5_0.5b_instruct_eval_v2 --output-dir paper/figures"
+        ),
+        formatter_class=_HelpFormatter,
+    )
     parser.add_argument("--config", default="configs/experiment.yaml")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    fetch_parser = subparsers.add_parser("fetch-moral-stories")
-    fetch_parser.add_argument("--output", default="data/raw/moral_stories_full.jsonl")
-    fetch_parser.add_argument("--force", action="store_true")
+    fetch_parser = subparsers.add_parser(
+        "fetch-moral-stories",
+        help="Download the upstream Moral Stories source file to the local raw-data path.",
+        description="Download the upstream Moral Stories JSONL file used to build the benchmark.",
+        formatter_class=_HelpFormatter,
+    )
+    fetch_parser.add_argument("--output", default="data/raw/moral_stories_full.jsonl", help="Destination path for the downloaded JSONL file.")
+    fetch_parser.add_argument("--force", action="store_true", help="Overwrite an existing local copy instead of reusing it.")
     fetch_parser.set_defaults(func=cmd_fetch_moral_stories)
 
-    build_parser_cmd = subparsers.add_parser("build-items")
-    build_parser_cmd.add_argument("--raw-path")
-    build_parser_cmd.add_argument("--candidate-path")
-    build_parser_cmd.add_argument("--dev-path")
-    build_parser_cmd.add_argument("--eval-path")
-    build_parser_cmd.add_argument("--review-csv-path")
-    build_parser_cmd.add_argument("--candidate-limit", type=int)
-    build_parser_cmd.add_argument("--dev-size", type=int)
-    build_parser_cmd.add_argument("--eval-size", type=int)
-    build_parser_cmd.add_argument("--seed", type=int)
+    build_parser_cmd = subparsers.add_parser(
+        "build-items",
+        help="Construct candidate, dev, and eval item files from Moral Stories.",
+        description="Build the contrastive A/B benchmark items and the review sheet from Moral Stories source data.",
+        formatter_class=_HelpFormatter,
+    )
+    build_parser_cmd.add_argument("--raw-path", help="Path to the raw Moral Stories JSONL file.")
+    build_parser_cmd.add_argument("--candidate-path", help="Output path for the candidate item pool.")
+    build_parser_cmd.add_argument("--dev-path", help="Output path for the draft development split.")
+    build_parser_cmd.add_argument("--eval-path", help="Output path for the draft evaluation split.")
+    build_parser_cmd.add_argument("--review-csv-path", help="Output path for the manual review sheet.")
+    build_parser_cmd.add_argument("--candidate-limit", type=int, help="Maximum candidate items to keep before locking splits.")
+    build_parser_cmd.add_argument("--dev-size", type=int, help="Development split size.")
+    build_parser_cmd.add_argument("--eval-size", type=int, help="Evaluation split size.")
+    build_parser_cmd.add_argument("--seed", type=int, help="Random seed for split construction and balancing.")
     build_parser_cmd.set_defaults(func=cmd_build_items)
 
-    review_parser = subparsers.add_parser("apply-item-review")
-    review_parser.add_argument("--candidate-path")
-    review_parser.add_argument("--review-csv-path")
-    review_parser.add_argument("--dev-path")
-    review_parser.add_argument("--eval-path")
-    review_parser.add_argument("--dev-size", type=int)
-    review_parser.add_argument("--eval-size", type=int)
-    review_parser.add_argument("--seed", type=int)
+    review_parser = subparsers.add_parser(
+        "apply-item-review",
+        help="Apply the manual review sheet and lock the public dev/eval splits.",
+        description="Read the item review CSV, apply accept/reject and tag overrides, and write the locked item splits.",
+        formatter_class=_HelpFormatter,
+    )
+    review_parser.add_argument("--candidate-path", help="Candidate pool JSONL to review.")
+    review_parser.add_argument("--review-csv-path", help="Manual review CSV with accept/reject and override fields.")
+    review_parser.add_argument("--dev-path", help="Output path for the locked dev split.")
+    review_parser.add_argument("--eval-path", help="Output path for the locked eval split.")
+    review_parser.add_argument("--dev-size", type=int, help="Development split size after review.")
+    review_parser.add_argument("--eval-size", type=int, help="Evaluation split size after review.")
+    review_parser.add_argument("--seed", type=int, help="Random seed used when locking the reviewed splits.")
     review_parser.set_defaults(func=cmd_apply_item_review)
 
-    run_parser = subparsers.add_parser("run-experiment")
-    run_parser.add_argument("--model", required=True)
-    run_parser.add_argument("--split", choices=["dev", "eval"], default="eval")
-    run_parser.add_argument("--frames-path", default="configs/frames.yaml")
-    run_parser.add_argument("--frame-mode", choices=["selected", "family_audit"])
-    run_parser.add_argument("--run-id")
-    run_parser.add_argument("--ollama-base-url")
-    run_parser.add_argument("--timeout", type=int)
-    run_parser.add_argument("--temperature", type=float)
-    run_parser.add_argument("--max-judgment-tokens", type=int)
-    run_parser.add_argument("--max-explanation-tokens", type=int)
-    run_parser.add_argument("--sanity-subset-size", type=int)
-    run_parser.add_argument("--item-ids", nargs="*")
-    run_parser.add_argument("--max-items", type=int)
-    run_parser.add_argument("--output")
-    run_parser.add_argument("--seed", type=int)
-    run_parser.add_argument("--resume", action=argparse.BooleanOptionalAction)
+    run_parser = subparsers.add_parser(
+        "run-experiment",
+        help="Execute the staged J1->E->J2 protocol against a local model endpoint.",
+        description="Run the staged moral-evaluation experiment for one model and one split, writing JSONL rows plus a run manifest.",
+        formatter_class=_HelpFormatter,
+    )
+    run_parser.add_argument("--model", required=True, help="Model name served by the local Ollama-compatible endpoint.")
+    run_parser.add_argument("--split", choices=["dev", "eval"], default="eval", help="Locked benchmark split to run.")
+    run_parser.add_argument("--frames-path", default="configs/frames.yaml", help="Frame and lexicon configuration file.")
+    run_parser.add_argument("--frame-mode", choices=["selected", "family_audit"], help="Whether to run only the selected frames or all configured variants.")
+    run_parser.add_argument("--run-id", help="Explicit run identifier written into result rows and the manifest.")
+    run_parser.add_argument("--ollama-base-url", help="Base URL for the local chat-completions-compatible endpoint.")
+    run_parser.add_argument("--timeout", type=int, help="HTTP timeout in seconds.")
+    run_parser.add_argument("--temperature", type=float, help="Sampling temperature. The released runs use 0.0.")
+    run_parser.add_argument("--max-judgment-tokens", type=int, help="Token cap for J1 and J2 judgment calls.")
+    run_parser.add_argument("--max-explanation-tokens", type=int, help="Token cap for the explanation stage.")
+    run_parser.add_argument("--sanity-subset-size", type=int, help="Number of items to include in the judgment-only baseline subset.")
+    run_parser.add_argument("--item-ids", nargs="*", help="Optional item IDs to run instead of the whole split.")
+    run_parser.add_argument("--max-items", type=int, help="Optional hard cap on the number of items to run.")
+    run_parser.add_argument("--output", help="Output JSONL path. Defaults to outputs/runs/<model>_<split>_<run-id>.jsonl.")
+    run_parser.add_argument("--seed", type=int, help="Random seed recorded in outputs and used for the sanity subset.")
+    run_parser.add_argument("--resume", action=argparse.BooleanOptionalAction, help="Resume from an existing output file when possible.")
     run_parser.set_defaults(func=cmd_run_experiment)
 
-    analyze_parser = subparsers.add_parser("analyze-results")
-    analyze_parser.add_argument("--results", nargs="+", required=True)
-    analyze_parser.add_argument("--annotation")
-    analyze_parser.add_argument("--items-path")
-    analyze_parser.add_argument("--frames-path", default="configs/frames.yaml")
-    analyze_parser.add_argument("--output-dir")
-    analyze_parser.add_argument("--bootstrap-samples", type=int)
-    analyze_parser.add_argument("--bootstrap-seed", type=int)
-    analyze_parser.add_argument("--permutation-samples", type=int)
+    analyze_parser = subparsers.add_parser(
+        "analyze-results",
+        help="Aggregate raw JSONL runs into reports, tables, manifests, and figures.",
+        description="Analyze one or more experiment result files and write the full paper-facing bundle to an output directory.",
+        formatter_class=_HelpFormatter,
+    )
+    analyze_parser.add_argument("--results", nargs="+", required=True, help="One or more result JSONL files to analyze.")
+    analyze_parser.add_argument("--annotation", help="Optional human annotation CSV to merge into the analysis.")
+    analyze_parser.add_argument("--items-path", help="Explicit item JSONL path if it cannot be inferred from the result metadata.")
+    analyze_parser.add_argument("--frames-path", default="configs/frames.yaml", help="Frame and lexicon configuration file.")
+    analyze_parser.add_argument("--output-dir", help="Directory where the full analysis bundle will be written.")
+    analyze_parser.add_argument("--bootstrap-samples", type=int, help="Number of bootstrap resamples for uncertainty intervals.")
+    analyze_parser.add_argument("--bootstrap-seed", type=int, help="Bootstrap RNG seed.")
+    analyze_parser.add_argument("--permutation-samples", type=int, help="Number of sign-flip permutation draws for paired tests.")
     analyze_parser.set_defaults(func=cmd_analyze_results)
 
-    paper_figures_parser = subparsers.add_parser("build-paper-figures")
-    paper_figures_parser.add_argument("--analysis-dirs", nargs="+", required=True)
-    paper_figures_parser.add_argument("--output-dir")
+    paper_figures_parser = subparsers.add_parser(
+        "build-paper-figures",
+        help="Generate the canonical README and paper figures from analysis bundles.",
+        description="Build the release-facing PNG figures used by the manuscript and repository README.",
+        formatter_class=_HelpFormatter,
+    )
+    paper_figures_parser.add_argument("--analysis-dirs", nargs="+", required=True, help="One or more analysis directories that contain CSV summary tables.")
+    paper_figures_parser.add_argument("--output-dir", help="Target directory for the generated figure PNG files.")
     paper_figures_parser.set_defaults(func=cmd_build_paper_figures)
 
     return parser

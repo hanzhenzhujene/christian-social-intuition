@@ -27,6 +27,44 @@
 | Main take-home | Explanation is more prompt-sensitive than first-pass judgment relative to baseline; Christian-specific residuals weaken under matched control |
 | Release status | Committed selected-v2 raw runs, regenerated analysis bundles, compiled paper PDF, and CI smoke checks |
 
+## Quickstart
+
+### 1. Rebuild the released paper-facing artifacts
+
+```bash
+make setup
+make release-check
+```
+
+This is the canonical local reproduction path for the public release. It will:
+
+- install pinned runtime and dev dependencies
+- run `pytest`
+- rebuild the committed analysis bundles from the released raw runs
+- regenerate the paper and README figures
+- recompile [`paper/main.pdf`](paper/main.pdf)
+
+### 2. Re-run the selected-v2 experiments themselves
+
+Only do this if you want to regenerate the raw model outputs. You need a local Ollama-compatible endpoint with both Qwen models available.
+
+```bash
+make rerun-selected-v2
+make release-check
+```
+
+## Canonical Release Surface
+
+If you only read five things in this repository, make them these:
+
+| Artifact | Why it matters |
+|---|---|
+| [`paper/main.pdf`](paper/main.pdf) | Canonical writeup |
+| [`paper/main.tex`](paper/main.tex) | Canonical manuscript source |
+| [`outputs/analysis/final_combined_v2/analysis_report.md`](outputs/analysis/final_combined_v2/analysis_report.md) | Combined empirical readout |
+| [`outputs/analysis/final_combined_v2/main_text_direct_contrasts.csv`](outputs/analysis/final_combined_v2/main_text_direct_contrasts.csv) | Main matched-control statistics |
+| [`docs/final_revision/appendix_draft.md`](docs/final_revision/appendix_draft.md) | Exact prompts, metric definitions, and reproducibility details |
+
 ## Main Empirical Takeaway
 
 The strongest evidence in this repository is a **mechanism distinction**, not a robust Christian-specific advantage claim.
@@ -67,21 +105,21 @@ The Christian-framing case study is the application. The broader contribution is
 
 ## What To Read First
 
-- [paper/main.pdf](paper/main.pdf) for the canonical writeup
-- [outputs/analysis/final_combined_v2/analysis_report.md](outputs/analysis/final_combined_v2/analysis_report.md) for the combined empirical readout
-- [docs/final_revision/appendix_draft.md](docs/final_revision/appendix_draft.md) for metric definitions, prompt text, and reproducibility details
-- [CONTRIBUTING.md](CONTRIBUTING.md) for contribution and validation expectations
+- [paper/main.pdf](paper/main.pdf) for the canonical argument
+- [outputs/analysis/final_combined_v2/analysis_report.md](outputs/analysis/final_combined_v2/analysis_report.md) for the empirical readout
+- [docs/final_revision/appendix_draft.md](docs/final_revision/appendix_draft.md) for prompts, metrics, and appendix detail
+- [outputs/README.md](outputs/README.md) for the released run and analysis layout
+- [CONTRIBUTING.md](CONTRIBUTING.md) for validation expectations
 
 ## Reproduce The Released Artifacts
 
-If you want to reproduce the released paper-facing artifacts from the committed raw runs:
+The public repository is intentionally split into:
 
-```bash
-make setup
-make release-check
-```
+- committed raw selected-v2 runs in [`outputs/runs/`](outputs/runs/)
+- committed paper-facing analysis bundles in [`outputs/analysis/`](outputs/analysis/)
+- committed manuscript and figures in [`paper/`](paper/)
 
-This is the same release path the repository is designed to support locally, and GitHub Actions now runs the lightweight subset on every push and pull request:
+GitHub Actions runs the lightweight release checks on every push and pull request:
 
 - `pytest -q`
 - `make paper-smoke`
@@ -94,7 +132,7 @@ The full local release check will:
 - regenerate paper/README figures
 - recompile [paper/main.pdf](paper/main.pdf)
 
-Expected refreshed outputs:
+Expected refreshed outputs after `make release-check`:
 
 - `outputs/analysis/qwen2.5_7b_instruct_eval_v2/`
 - `outputs/analysis/qwen2.5_0.5b_instruct_eval_v2/`
@@ -150,7 +188,13 @@ docs/final_revision/              appendix, reviewer-risk memo, and release-faci
 tests/                            unit tests for parsing, metrics, item construction, and analysis
 ```
 
-For the broader documentation layout, see [docs/README.md](docs/README.md).
+Directory guides:
+
+- [docs/README.md](docs/README.md)
+- [data/README.md](data/README.md)
+- [outputs/README.md](outputs/README.md)
+- [paper/README.md](paper/README.md)
+- [paper/figures/README.md](paper/figures/README.md)
 
 ## Reproducibility Details
 

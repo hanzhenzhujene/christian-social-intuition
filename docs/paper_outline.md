@@ -13,7 +13,7 @@ A staged LLM evaluation design shows that Christian heart-focused framing yields
 
 - Goal: Frame the paper as a mechanism study, not a generic prompt-effect paper.
 - Must include: the judgment-versus-explanation distinction, SIM motivation, staged `J1 -> E -> J2` design, main `qwen` result, same-family `0.5B` comparison setup, and perfect sanity agreement.
-- Evidence/artifacts to cite: [final_readout.md](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/outputs/analysis/final_readout.md), [qwen v2 analysis report](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/outputs/analysis/qwen2.5_7b_instruct_eval_v2/analysis_report.md), and the `qwen2.5:0.5b-instruct` selected-v2 outputs once completed.
+- Evidence/artifacts to cite: [final_readout.md](../outputs/analysis/final_readout.md), [qwen v2 analysis report](../outputs/analysis/qwen2.5_7b_instruct_eval_v2/analysis_report.md), and the released `qwen2.5:0.5b-instruct` selected-v2 outputs.
 - Guardrails: Do not mention unsupported consistency findings or oversell model generality.
 
 ## Introduction
@@ -26,7 +26,7 @@ A staged LLM evaluation design shows that Christian heart-focused framing yields
   - Christian framing as a useful motive/heart probe rather than a normative standard
   - `christian_post` as the cleanest post-hoc rationalization test
   - preview of the `qwen` findings and the same-family scale-comparison logic
-- Evidence/artifacts to cite: [methods_draft.md](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/docs/methods_draft.md), [results_draft.md](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/docs/results_draft.md), [final_readout.md](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/outputs/analysis/final_readout.md).
+- Evidence/artifacts to cite: [methods_draft.md](methods_draft.md), [results_draft.md](results_draft.md), [final_readout.md](../outputs/analysis/final_readout.md).
 - Guardrails:
   - avoid theology-first framing
   - explicitly say “intuition” is operationalized, not literal
@@ -55,7 +55,7 @@ A staged LLM evaluation design shows that Christian heart-focused framing yields
   - how `J1`, `E`, and `J2` map onto an operationalized LLM analogue
   - why `christian_post` is theoretically informative
   - why this is an analogy for observed behavior, not a claim about internal cognition
-- Evidence/artifacts to cite: [discussion_draft.md](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/docs/discussion_draft.md), [methods_draft.md](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/docs/methods_draft.md).
+- Evidence/artifacts to cite: [discussion_draft.md](discussion_draft.md), [methods_draft.md](methods_draft.md).
 - Guardrails:
   - do not anthropomorphize the models
   - avoid saying LLMs “have” intuitions in the human sense
@@ -71,7 +71,7 @@ A staged LLM evaluation design shows that Christian heart-focused framing yields
   - option-order balancing
   - manual review and retagging
   - final split sizes
-- Evidence/artifacts to cite: [item_audit.md](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/docs/item_audit.md), [methods_draft.md](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/docs/methods_draft.md), [item_review_v1.csv](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/data/processed/item_review_v1.csv).
+- Evidence/artifacts to cite: [item_audit.md](item_audit.md), [methods_draft.md](methods_draft.md), [item_review_v1.csv](../data/processed/item_review_v1.csv).
 - Guardrails:
   - do not imply the tags are perfect or fully theory-pure
   - note that final tag balance is intentionally uneven after manual correction
@@ -85,7 +85,7 @@ A staged LLM evaluation design shows that Christian heart-focused framing yields
   - matched Christian and secular frames
   - why pre/post timing is the key manipulated difference
   - why everyday scenarios are preferable to trolley-style paradigms here
-- Evidence/artifacts to cite: [frame_selection_protocol.md](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/docs/frame_selection_protocol.md), [methods_draft.md](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/docs/methods_draft.md).
+- Evidence/artifacts to cite: [frame_selection_protocol.md](frame_selection_protocol.md), [methods_draft.md](methods_draft.md).
 - Guardrails:
   - do not introduce new conditions not actually run
   - do not imply explanation-stage labels were human-coded
@@ -101,7 +101,7 @@ A staged LLM evaluation design shows that Christian heart-focused framing yields
   - sanity agreement
   - mixed-effects analyses as confirmatory rather than headline evidence
   - annotation sheet generation and the pending status of manual coding
-- Evidence/artifacts to cite: [methods_draft.md](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/docs/methods_draft.md), [qwen v2 analysis report](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/outputs/analysis/qwen2.5_7b_instruct_eval_v2/analysis_report.md), the `qwen2.5:0.5b-instruct` selected-v2 outputs, and the annotation sheets.
+- Evidence/artifacts to cite: [methods_draft.md](methods_draft.md), [qwen v2 analysis report](../outputs/analysis/qwen2.5_7b_instruct_eval_v2/analysis_report.md), the `qwen2.5:0.5b-instruct` selected-v2 outputs, and the annotation sheets.
 - Guardrails:
   - treat consistency as pending
   - do not imply mixed-effects are the only evidence base
@@ -128,9 +128,9 @@ A staged LLM evaluation design shows that Christian heart-focused framing yields
   - **Pending human annotation**
     - explanation-consistency subsection present but explicitly marked incomplete
 - Evidence/artifacts to cite:
-  - [qwen v2 analysis report](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/outputs/analysis/qwen2.5_7b_instruct_eval_v2/analysis_report.md)
-  - the `qwen2.5:0.5b-instruct` selected-v2 outputs once completed
-  - [final_readout.md](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/outputs/analysis/final_readout.md)
+  - [qwen v2 analysis report](../outputs/analysis/qwen2.5_7b_instruct_eval_v2/analysis_report.md)
+  - the released `qwen2.5:0.5b-instruct` selected-v2 outputs
+  - [final_readout.md](../outputs/analysis/final_readout.md)
   - raw run files for selected examples
 - Guardrails:
   - do not claim Christian framing broadly rewrites first-pass judgment
@@ -145,7 +145,7 @@ A staged LLM evaluation design shows that Christian heart-focused framing yields
   - why the effect is best described as layered rather than purely post-hoc or purely first-pass
   - why matched secular motive framing matters for this interpretation
   - implications for future prompt-based LLM morality work
-- Evidence/artifacts to cite: [discussion_draft.md](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/docs/discussion_draft.md), [results_draft.md](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/docs/results_draft.md).
+- Evidence/artifacts to cite: [discussion_draft.md](discussion_draft.md), [results_draft.md](results_draft.md).
 - Guardrails:
   - avoid sweeping theory claims across all LLMs
   - do not overstate the Christian-specific increment
@@ -161,7 +161,7 @@ A staged LLM evaluation design shows that Christian heart-focused framing yields
   - baseline already high on motive-focus for `qwen`
   - operational rather than literal use of “intuition”
   - model- and prompt-family sensitivity
-- Evidence/artifacts to cite: both analysis reports, annotation sheets, [discussion_draft.md](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/docs/discussion_draft.md).
+- Evidence/artifacts to cite: both analysis reports, annotation sheets, [discussion_draft.md](discussion_draft.md).
 - Guardrails:
   - do not turn limitations into a second discussion section
   - keep them concrete and tied to this dataset and setup
@@ -173,7 +173,7 @@ A staged LLM evaluation design shows that Christian heart-focused framing yields
   - the staged design contribution
   - the main empirical takeaway that first-pass Christian-over-secular movement is modest and explanation language is more labile but not cleanly Christian-specific under matched-control analysis
   - why this matters for future benchmark design
-- Evidence/artifacts to cite: [final_readout.md](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/outputs/analysis/final_readout.md).
+- Evidence/artifacts to cite: [final_readout.md](../outputs/analysis/final_readout.md).
 - Guardrails:
   - do not claim the paper resolves LLM moral reasoning in general
   - do not imply theology-specific superiority
@@ -186,7 +186,7 @@ A staged LLM evaluation design shows that Christian heart-focused framing yields
   - prompt-conditioned moral evaluation can be rhetorically malleable
   - explanation-layer shifts may be mistaken for deeper value alignment
   - potential misuse of religious or ideological prompting in alignment narratives
-- Evidence/artifacts to cite: design rationale in [methods_draft.md](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/docs/methods_draft.md) and empirical findings in both reports.
+- Evidence/artifacts to cite: design rationale in [methods_draft.md](methods_draft.md) and empirical findings in both reports.
 - Guardrails:
   - avoid culture-war framing
   - avoid endorsing any religious viewpoint
@@ -203,9 +203,9 @@ A staged LLM evaluation design shows that Christian heart-focused framing yields
   - annotation rubric
   - same-family comparison tables, heterogeneity tables, paraphrase-audit tables, and mixed-effects full outputs
 - Evidence/artifacts to cite:
-  - [frame_selection_protocol.md](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/docs/frame_selection_protocol.md)
-  - [item_audit.md](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/docs/item_audit.md)
-  - [annotation_rubric.md](/Users/hanzhenzhu/Desktop/Christian_Social_intuition/docs/annotation_rubric.md)
+  - [frame_selection_protocol.md](frame_selection_protocol.md)
+  - [item_audit.md](item_audit.md)
+  - [annotation_rubric.md](annotation_rubric.md)
   - both analysis directories
 - Guardrails:
   - appendix should support reproducibility, not carry new headline claims
