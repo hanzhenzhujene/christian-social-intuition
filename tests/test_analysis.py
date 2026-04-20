@@ -4,6 +4,8 @@ from pathlib import Path
 import pandas as pd
 from PIL import Image
 
+import christian_social_intuition.readme_summary_figure as readme_summary_figure_module
+import christian_social_intuition.study_overview_figure as study_overview_figure_module
 from christian_social_intuition.analysis import (
     build_appendix_direct_contrasts,
     build_condition_pairs,
@@ -23,8 +25,6 @@ from christian_social_intuition.analysis import (
     plot_revision_figure,
     select_qualitative_examples,
 )
-from christian_social_intuition.readme_summary_figure import build_readme_results_summary
-from christian_social_intuition.study_overview_figure import build_study_overview_figure
 
 
 def _demo_results() -> pd.DataFrame:
@@ -134,6 +134,96 @@ def _assert_rgb_png(path: Path) -> None:
         assert image.mode == "RGB"
 
 
+def _write_release_figure_inputs(base_dir: Path) -> tuple[Path, Path]:
+    q7_dir = base_dir / "qwen2.5_7b_instruct_eval_v2"
+    q05_dir = base_dir / "qwen2.5_0.5b_instruct_eval_v2"
+    q7_dir.mkdir(parents=True, exist_ok=True)
+    q05_dir.mkdir(parents=True, exist_ok=True)
+
+    q7_summary = pd.DataFrame(
+        [
+            {
+                "condition": "christian_pre",
+                "j1_act_shift_rate": 0.0,
+                "j1_heart_shift_rate": 0.0916667,
+                "semantic_score_controlled_delta_vs_baseline": 0.15,
+                "j2_heart_revision_rate": 0.0083333,
+            },
+            {
+                "condition": "christian_post",
+                "j1_act_shift_rate": 0.0,
+                "j1_heart_shift_rate": 0.0,
+                "semantic_score_controlled_delta_vs_baseline": 0.10,
+                "j2_heart_revision_rate": 0.0666667,
+            },
+        ]
+    )
+    q05_summary = pd.DataFrame(
+        [
+            {
+                "condition": "christian_pre",
+                "j1_act_shift_rate": 0.0083333,
+                "j1_heart_shift_rate": 0.0083333,
+                "semantic_score_controlled_delta_vs_baseline": 0.0,
+                "j2_heart_revision_rate": 0.0,
+            },
+            {
+                "condition": "christian_post",
+                "j1_act_shift_rate": 0.0,
+                "j1_heart_shift_rate": 0.0,
+                "semantic_score_controlled_delta_vs_baseline": 0.025,
+                "j2_heart_revision_rate": 0.0083333,
+            },
+        ]
+    )
+    q7_summary.to_csv(q7_dir / "condition_summary.csv", index=False)
+    q05_summary.to_csv(q05_dir / "condition_summary.csv", index=False)
+
+    direct = pd.DataFrame(
+        [
+            {
+                "contrast_label": "C-pre - S-pre on J1 heart shift",
+                "qwen_7b_estimate_pp": 1.67,
+                "qwen_7b_ci_low_pp": 0.0,
+                "qwen_7b_ci_high_pp": 4.17,
+                "qwen_05b_estimate_pp": -0.83,
+                "qwen_05b_ci_low_pp": -2.5,
+                "qwen_05b_ci_high_pp": 0.0,
+            },
+            {
+                "contrast_label": "C-pre - S-pre on J1 act shift",
+                "qwen_7b_estimate_pp": -0.83,
+                "qwen_7b_ci_low_pp": -2.5,
+                "qwen_7b_ci_high_pp": 0.0,
+                "qwen_05b_estimate_pp": 0.0,
+                "qwen_05b_ci_low_pp": 0.0,
+                "qwen_05b_ci_high_pp": 0.0,
+            },
+            {
+                "contrast_label": "C-post - S-post on controlled semantic score",
+                "qwen_7b_estimate_pp": -5.0,
+                "qwen_7b_ci_low_pp": -13.33,
+                "qwen_7b_ci_high_pp": 1.67,
+                "qwen_05b_estimate_pp": 2.5,
+                "qwen_05b_ci_low_pp": -0.83,
+                "qwen_05b_ci_high_pp": 6.67,
+            },
+            {
+                "contrast_label": "C-post - S-post on J1→J2 heart revision",
+                "qwen_7b_estimate_pp": -1.67,
+                "qwen_7b_ci_low_pp": -4.17,
+                "qwen_7b_ci_high_pp": 0.0,
+                "qwen_05b_estimate_pp": 0.0,
+                "qwen_05b_ci_low_pp": 0.0,
+                "qwen_05b_ci_high_pp": 0.0,
+            },
+        ]
+    )
+    direct.to_csv(q7_dir / "main_text_direct_contrasts.csv", index=False)
+    direct.to_csv(q05_dir / "main_text_direct_contrasts.csv", index=False)
+    return q7_dir, q05_dir
+
+
 def test_compute_condition_summary_has_expected_columns():
     summary = compute_condition_summary(_demo_results(), lexicons=_lexicons(), bootstrap_samples=50, bootstrap_seed=1)
     expected = {
@@ -226,12 +316,19 @@ def test_plot_functions_write_files(tmp_path):
         _assert_rgb_png(path)
 
 
-def test_release_companion_figures_are_saved_as_rgb_png(tmp_path):
+def test_release_companion_figures_are_saved_as_rgb_png(tmp_path, monkeypatch):
     readme_path = tmp_path / "readme_summary.png"
     overview_path = tmp_path / "study_overview.png"
+    analysis_root = tmp_path / "analysis"
+    q7_dir, q05_dir = _write_release_figure_inputs(analysis_root)
 
-    build_readme_results_summary(readme_path)
-    build_study_overview_figure(overview_path)
+    monkeypatch.setattr(readme_summary_figure_module, "Q7_DIR", q7_dir)
+    monkeypatch.setattr(readme_summary_figure_module, "Q05_DIR", q05_dir)
+    monkeypatch.setattr(study_overview_figure_module, "Q7_DIR", q7_dir)
+    monkeypatch.setattr(study_overview_figure_module, "Q05_DIR", q05_dir)
+
+    readme_summary_figure_module.build_readme_results_summary(readme_path)
+    study_overview_figure_module.build_study_overview_figure(overview_path)
 
     for path in [readme_path, overview_path]:
         assert path.exists() and path.stat().st_size > 0
