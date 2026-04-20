@@ -10,7 +10,7 @@
 [Paper (PDF)](paper/main.pdf) · [Canonical LaTeX](paper/main.tex) · [Qwen 7B analysis](outputs/analysis/qwen2.5_7b_instruct_eval_v2/analysis_report.md) · [Qwen 0.5B analysis](outputs/analysis/qwen2.5_0.5b_instruct_eval_v2/analysis_report.md)
 
 <p align="center">
-  <img src="paper/figures/study_overview_main.png" alt="Study overview: benchmark, staged protocol, identification logic, and evidence snapshot." width="100%">
+  <img src="paper/figures/study_overview_main.png" alt="Study overview: benchmark, staged protocol, identification logic, and evidence snapshot." width="960">
 </p>
 <p align="center">
   <em>Study overview: design logic plus a compact evidence snapshot from the released Qwen runs.</em>
@@ -27,12 +27,43 @@
 | Main take-home | Explanation is more prompt-sensitive than first-pass judgment relative to baseline; Christian-specific residuals weaken under matched control |
 | Release status | Committed selected-v2 raw runs, regenerated analysis bundles, compiled paper PDF, and CI smoke checks |
 
+## If You're Coming From The Paper
+
+This repository is organized as a paper companion release, so the fastest path is:
+
+- [`paper/main.pdf`](paper/main.pdf) for the canonical argument
+- [`outputs/analysis/final_combined_v2/main_text_direct_contrasts.csv`](outputs/analysis/final_combined_v2/main_text_direct_contrasts.csv) for the exact matched-control estimates behind the main claims
+- [`docs/final_revision/appendix_draft.md`](docs/final_revision/appendix_draft.md) for prompts, metric definitions, and reproducibility details
+- [`outputs/analysis/final_combined_v2/analysis_report.md`](outputs/analysis/final_combined_v2/analysis_report.md) for the shortest artifact-grounded summary of the released runs
+
+## Evidence Snapshot
+
+These are the comparisons that most directly determine what the paper can and cannot claim:
+
+| Diagnostic comparison | Qwen 7B | Qwen 0.5B | Practical reading |
+|---|---|---|---|
+| `christian_pre - secular_pre` on `J1 heart shift` | `+1.67 pp` `[+0.00, +4.17]` | `-0.83 pp` `[-2.50, +0.00]` | At most a modest Christian-specific first-pass heart increment in 7B; it does not persist at smaller scale. |
+| `christian_post - secular_post` on controlled semantic explanation score | `-5.00 pp` `[-13.33, +1.67]` | `+2.50 pp` `[-0.83, +6.67]` | No stable Christian-specific explanation residual survives matched control plus lexical-echo control. |
+| `christian_post` `J1 -> J2` heart revision rate | `6.67%` | `0.83%` | Revision is rare, so explanation can move without substantial downstream judgment rewriting. |
+| `baseline` vs `judgment_only` sanity agreement | `1.0 / 1.0` | `1.0 / 1.0` | The staged interface does not appear to distort first-pass exposed judgment on the sanity subset. |
+
 ## Quickstart
 
-### 1. Rebuild the released paper-facing artifacts
+### 1. Run the same lightweight checks as CI
 
 ```bash
 make setup
+make ci-smoke
+```
+
+This is the fastest trust check for the public release. It runs:
+
+- `pytest -q`
+- `make paper-smoke`
+
+### 2. Rebuild the released paper-facing artifacts
+
+```bash
 make release-check
 ```
 
@@ -44,7 +75,7 @@ This is the canonical local reproduction path for the public release. It will:
 - regenerate the paper and README figures
 - recompile [`paper/main.pdf`](paper/main.pdf)
 
-### 2. Re-run the selected-v2 experiments themselves
+### 3. Re-run the selected-v2 experiments themselves
 
 Only do this if you want to regenerate the raw model outputs. You need a local Ollama-compatible endpoint with both Qwen models available.
 
@@ -75,7 +106,7 @@ The strongest evidence in this repository is a **mechanism distinction**, not a 
 4. **Re-judgment barely moves.** `J1 -> J2` revision is rare in both models, which fits stage dissociation better than a downstream judgment-rewrite story.
 
 <p align="center">
-  <img src="paper/figures/readme_results_summary.png" alt="Three-panel results summary comparing baseline-relative movement, matched-control residuals, and same-family scale attenuation." width="100%">
+  <img src="paper/figures/readme_results_summary.png" alt="Three-panel results summary comparing baseline-relative movement, matched-control residuals, and same-family scale attenuation." width="960">
 </p>
 <p align="center">
   <em>Results summary: baseline movement is easiest to induce, matched-control residuals are much smaller, and the same-family scale comparison mainly shows attenuation.</em>
@@ -121,8 +152,7 @@ The public repository is intentionally split into:
 
 GitHub Actions runs the lightweight release checks on every push and pull request:
 
-- `pytest -q`
-- `make paper-smoke`
+- `make ci-smoke`
 
 The full local release check will:
 
@@ -131,6 +161,12 @@ The full local release check will:
 - rebuild model-specific and combined analysis bundles
 - regenerate paper/README figures
 - recompile [paper/main.pdf](paper/main.pdf)
+
+If you only want to mirror the GitHub Actions gate locally, run:
+
+```bash
+make ci-smoke
+```
 
 Expected refreshed outputs after `make release-check`:
 

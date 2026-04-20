@@ -11,10 +11,16 @@ This directory contains the canonical manuscript source and release-facing figur
 From the repository root:
 
 ```bash
+make ci-smoke
+```
+
+That is the same lightweight gate used in GitHub Actions. If you want the full paper-facing refresh path, run:
+
+```bash
 make release-check
 ```
 
-That command:
+The full release check:
 
 - runs the test suite
 - rebuilds the analysis bundles from the committed selected-v2 raw runs

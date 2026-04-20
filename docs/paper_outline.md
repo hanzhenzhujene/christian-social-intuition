@@ -42,7 +42,7 @@ A staged LLM evaluation design shows that Christian heart-focused framing yields
   - a gap statement that no prior line cleanly stage-separates first-pass judgment from explanation in a Christian-framing setup
 - Evidence/artifacts to cite:
   - current paper's design contrast versus single-response benchmark practice
-  - citation placeholders to fill later from literature review
+  - empirical prompt-effect and moral-psychology references selected during literature review
 - Guardrails:
   - do not claim “first” unless literature review really supports it
   - separate empirical prompt-effect papers from theory-linked mechanism papers

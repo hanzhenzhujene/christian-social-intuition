@@ -26,8 +26,7 @@ This installs the pinned runtime and dev dependencies and then installs the pack
 For most documentation or paper-text changes:
 
 ```bash
-pytest -q
-make paper-smoke
+make ci-smoke
 ```
 
 For changes that affect analysis, figures, or paper-facing numbers:

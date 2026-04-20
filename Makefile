@@ -2,12 +2,13 @@ PYTHON ?= python
 PIP ?= $(PYTHON) -m pip
 PKG ?= christian_social_intuition
 
-.PHONY: help setup test refresh-analysis refresh-figures paper paper-smoke release-check rerun-selected-v2 clean
+.PHONY: help setup test ci-smoke refresh-analysis refresh-figures paper paper-smoke release-check rerun-selected-v2 clean
 
 help:
 	@echo "Available targets:"
 	@echo "  make setup               Install pinned dependencies and the package in editable mode"
 	@echo "  make test                Run the test suite"
+	@echo "  make ci-smoke            Run the same lightweight checks as GitHub Actions"
 	@echo "  make refresh-analysis    Rebuild analysis bundles from the committed selected-v2 raw runs"
 	@echo "  make refresh-figures     Rebuild README and paper figure assets"
 	@echo "  make paper               Recompile the LaTeX paper"
@@ -23,6 +24,8 @@ setup:
 
 test:
 	pytest -q
+
+ci-smoke: test paper-smoke
 
 refresh-analysis:
 	PYTHONPATH=src $(PYTHON) -m $(PKG).cli analyze-results \
