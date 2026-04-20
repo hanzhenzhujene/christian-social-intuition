@@ -1319,6 +1319,12 @@ def plot_first_pass_shift(summary_df: pd.DataFrame, output_path: str | Path) -> 
     fig, axes = plt.subplots(1, len(models), figsize=(12.6, 5.7), sharey=True, sharex=True)
     if len(models) == 1:
         axes = [axes]
+    display_order = {
+        "secular_post": 0,
+        "christian_post": 1,
+        "secular_pre": 2,
+        "christian_pre": 3,
+    }
 
     def _ci_series(frame: pd.DataFrame, primary: str, fallback: str, value_col: str) -> pd.Series:
         if primary in frame.columns and frame[primary].notna().any():
@@ -1339,7 +1345,7 @@ def plot_first_pass_shift(summary_df: pd.DataFrame, output_path: str | Path) -> 
 
     for ax, model in zip(axes, models, strict=True):
         model_df = plot_df[plot_df["model"] == model].copy()
-        model_df["order"] = model_df["condition"].map(_condition_sort_key)
+        model_df["order"] = model_df["condition"].map(display_order)
         model_df = model_df.sort_values("order")
         ypos = np.arange(len(model_df))
 
@@ -1389,8 +1395,28 @@ def plot_first_pass_shift(summary_df: pd.DataFrame, output_path: str | Path) -> 
         ax.set_xlabel("Items shifted vs baseline")
         ax.xaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
         ax.set_xlim(-0.002, x_max)
-        ax.text(0.985, 0.80, "Pre-J1\nframe", transform=ax.transAxes, ha="right", va="center", fontsize=8.5, color="#55708D")
-        ax.text(0.985, 0.23, "Post-J1\nframe", transform=ax.transAxes, ha="right", va="center", fontsize=8.5, color="#9B6A3D")
+        ax.text(
+            0.985,
+            0.80,
+            "Pre-J1\nframe",
+            transform=ax.transAxes,
+            ha="right",
+            va="center",
+            fontsize=8.5,
+            color="#55708D",
+            bbox={"boxstyle": "round,pad=0.18", "facecolor": "white", "edgecolor": "none", "alpha": 0.78},
+        )
+        ax.text(
+            0.985,
+            0.23,
+            "Post-J1\nframe",
+            transform=ax.transAxes,
+            ha="right",
+            va="center",
+            fontsize=8.5,
+            color="#9B6A3D",
+            bbox={"boxstyle": "round,pad=0.18", "facecolor": "white", "edgecolor": "none", "alpha": 0.78},
+        )
         _style_axis(ax, grid_axis="x")
 
     axes[0].set_ylabel("Condition")
@@ -1403,7 +1429,7 @@ def plot_first_pass_shift(summary_df: pd.DataFrame, output_path: str | Path) -> 
     fig.text(
         0.06,
         0.92,
-        "The main visual comparison is within each condition: heart-level movement consistently exceeds act-level movement, while the smaller model attenuates the pattern.",
+        "Within each timing, heart-level movement exceeds act-level movement. Ordering the rows by framing position makes the pre-versus-post distinction readable at a glance.",
         fontsize=9,
         color="#4E4E4E",
     )

@@ -9,7 +9,12 @@
 
 [Paper (PDF)](paper/main.pdf) · [Canonical LaTeX](paper/main.tex) · [Qwen 7B analysis](outputs/analysis/qwen2.5_7b_instruct_eval_v2/analysis_report.md) · [Qwen 0.5B analysis](outputs/analysis/qwen2.5_0.5b_instruct_eval_v2/analysis_report.md)
 
-![Study overview](paper/figures/study_overview_main.png)
+<p align="center">
+  <img src="paper/figures/study_overview_main.png" alt="Study overview: benchmark, staged protocol, identification logic, and evidence snapshot." width="100%">
+</p>
+<p align="center">
+  <em>Study overview: design logic plus a compact evidence snapshot from the released Qwen runs.</em>
+</p>
 
 ## At a Glance
 
@@ -21,6 +26,29 @@
 | Models | `qwen2.5:7b-instruct` and `qwen2.5:0.5b-instruct` |
 | Main take-home | Explanation is more prompt-sensitive than first-pass judgment relative to baseline; Christian-specific residuals weaken under matched control |
 | Release status | Committed selected-v2 raw runs, regenerated analysis bundles, compiled paper PDF, and CI smoke checks |
+
+## Main Empirical Takeaway
+
+The strongest evidence in this repository is a **mechanism distinction**, not a robust Christian-specific advantage claim.
+
+1. **Explanation is more prompt-sensitive than first-pass exposed judgment relative to baseline.** In the main 7B run, Christian pre-framing changes `J1 heart` on `9.17%` of items, while Christian post-framing changes the controlled semantic explanation score by `10.0%` relative to baseline.
+2. **The direct Christian-over-secular first-pass effect is modest.** On `qwen2.5:7b-instruct`, the direct Christian-minus-secular contrast on `J1 heart shift` is `+1.67 pp` with `95% CI [+0.00, +4.17]`. Act-level first-pass movement stays near zero.
+3. **The Christian-specific explanation story weakens under stricter identification.** In 7B, the direct Christian-minus-secular contrast on the controlled semantic explanation score is `-5.00 pp` with `95% CI [-13.33, +1.67]`. In `qwen2.5:0.5b-instruct`, the corresponding residual is only `+2.50 pp` with `95% CI [-0.83, +6.67]`.
+4. **Re-judgment barely moves.** `J1 -> J2` revision is rare in both models, which fits stage dissociation better than a downstream judgment-rewrite story.
+
+<p align="center">
+  <img src="paper/figures/readme_results_summary.png" alt="Three-panel results summary comparing baseline-relative movement, matched-control residuals, and same-family scale attenuation." width="100%">
+</p>
+<p align="center">
+  <em>Results summary: baseline movement is easiest to induce, matched-control residuals are much smaller, and the same-family scale comparison mainly shows attenuation.</em>
+</p>
+
+**How to read the figure**
+
+- Panel A: relative to baseline, explanation movement is clearly larger than act-level first-pass movement, and in the 7B model is similar in scale to heart-level first-pass movement.
+- Panel B: once the comparison is made directly against the matched secular motive-focused control, the Christian-specific residual becomes modest at `J1` and weak or unstable at the explanation layer.
+- Panel C: across Qwen scales, the Christian-specific story attenuates rather than becoming more stable.
+- Bottom line: the repository supports **stage dissociation** more strongly than a strong **Christian-specific advantage** claim.
 
 ## Why This Repository Is Worth Reading
 
@@ -91,23 +119,6 @@ make release-check
 | Does explanation movement change later judgment? | Usually invisible | Checked with `J1 -> J2` revision |
 
 This is the core research value of the project: it turns a vague prompt-effect question into a more identifiable mechanism question.
-
-## Main Empirical Takeaway
-
-The strongest evidence in this repository is a **mechanism distinction**, not a robust Christian-specific advantage claim.
-
-1. **Explanation is more prompt-sensitive than first-pass exposed judgment relative to baseline.** In the main 7B run, Christian pre-framing changes `J1 heart` on `9.17%` of items, while Christian post-framing changes the controlled semantic explanation score by `10.0%` relative to baseline.
-2. **The direct Christian-over-secular first-pass effect is modest.** On `qwen2.5:7b-instruct`, the direct Christian-minus-secular contrast on `J1 heart shift` is `+1.67 pp` with `95% CI [+0.00, +4.17]`. Act-level first-pass movement stays near zero.
-3. **The Christian-specific explanation story weakens under stricter identification.** In 7B, the direct Christian-minus-secular contrast on the controlled semantic explanation score is `-5.00 pp` with `95% CI [-13.33, +1.67]`. In `qwen2.5:0.5b-instruct`, the corresponding residual is only `+2.50 pp` with `95% CI [-0.83, +6.67]`.
-4. **Re-judgment barely moves.** `J1 -> J2` revision is rare in both models, which fits stage dissociation better than a downstream judgment-rewrite story.
-
-![README results summary](paper/figures/readme_results_summary.png)
-
-**How to read the figure**
-
-- Left panel: relative to baseline, explanation movement is clearly larger than act-level first-pass movement, and in the 7B model is similar in scale to heart-level first-pass movement.
-- Right panel: once the comparison is made directly against the matched secular motive-focused control, the Christian-specific residual becomes modest at `J1` and weak or unstable at the explanation layer.
-- Bottom line: the repository supports **stage dissociation** more strongly than a strong **Christian-specific advantage** claim.
 
 ## Why This Matters Beyond Christian Framing
 

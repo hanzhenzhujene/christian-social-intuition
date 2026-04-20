@@ -5,8 +5,11 @@ from __future__ import annotations
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+from matplotlib.lines import Line2D
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
+from matplotlib.ticker import PercentFormatter
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -14,32 +17,73 @@ Q7_DIR = ROOT / "outputs" / "analysis" / "qwen2.5_7b_instruct_eval_v2"
 Q05_DIR = ROOT / "outputs" / "analysis" / "qwen2.5_0.5b_instruct_eval_v2"
 OUTPUT_PATH = ROOT / "paper" / "figures" / "study_overview_main.png"
 
+NAVY = "#17324D"
+MUTED = "#5C6C7B"
+BORDER = "#D7E0EA"
+BLUE = "#4C78A8"
+RED = "#D64F4F"
+TEAL = "#1B7F79"
+GOLD = "#E5A93C"
+PURPLE = "#6B6FB0"
+PALE_BLUE = "#EEF4FB"
+PALE_TEAL = "#EEF9F7"
+PALE_RED = "#FFF1F1"
+PALE_GOLD = "#FFF7E8"
+PALE_PURPLE = "#F3F2FC"
 
-def _box(ax, xy, width, height, text, *, fc, ec, fontsize=12, weight="normal", color="#17324D", align="center"):
+
+def _card(ax, title: str, lines: list[str], *, fc: str, ec: str) -> None:
+    ax.set_axis_off()
     patch = FancyBboxPatch(
-        xy,
-        width,
-        height,
-        boxstyle="round,pad=0.02,rounding_size=0.02",
+        (0.01, 0.05),
+        0.98,
+        0.90,
+        boxstyle="round,pad=0.016,rounding_size=0.05",
         linewidth=1.5,
         facecolor=fc,
         edgecolor=ec,
+        transform=ax.transAxes,
+    )
+    ax.add_patch(patch)
+    ax.text(0.05, 0.77, title, transform=ax.transAxes, fontsize=13, fontweight="bold", color=NAVY, va="top")
+    ax.text(
+        0.05,
+        0.60,
+        "\n".join(lines),
+        transform=ax.transAxes,
+        fontsize=11.1,
+        color=NAVY,
+        va="top",
+        linespacing=1.35,
+    )
+
+
+def _mini_badge(ax, xy, width, text, *, fc, ec, color=NAVY) -> None:
+    patch = FancyBboxPatch(
+        xy,
+        width,
+        0.11,
+        boxstyle="round,pad=0.02,rounding_size=0.03",
+        linewidth=1.2,
+        facecolor=fc,
+        edgecolor=ec,
+        transform=ax.transAxes,
     )
     ax.add_patch(patch)
     ax.text(
-        xy[0] + (width / 2 if align == "center" else 0.018),
-        xy[1] + height / 2,
+        xy[0] + width / 2,
+        xy[1] + 0.055,
         text,
-        ha=align,
+        transform=ax.transAxes,
+        ha="center",
         va="center",
-        fontsize=fontsize,
-        fontweight=weight,
+        fontsize=10.2,
+        fontweight="bold",
         color=color,
-        wrap=True,
     )
 
 
-def _arrow(ax, start, end, color="#5B6E82"):
+def _arrow(ax, start, end, color="#5B6E82") -> None:
     ax.add_patch(
         FancyArrowPatch(
             start,
@@ -48,6 +92,7 @@ def _arrow(ax, start, end, color="#5B6E82"):
             mutation_scale=16,
             linewidth=1.8,
             color=color,
+            transform=ax.transAxes,
         )
     )
 
@@ -56,227 +101,254 @@ def _fmt_pp(value: float, low: float, high: float) -> str:
     return f"{value:+.2f} pp [{low:+.2f}, {high:+.2f}]"
 
 
-def _load_values() -> dict[str, str]:
+def _load_values() -> dict[str, object]:
     q7_summary = pd.read_csv(Q7_DIR / "condition_summary.csv").set_index("condition")
     q05_summary = pd.read_csv(Q05_DIR / "condition_summary.csv").set_index("condition")
     q7_direct = pd.read_csv(Q7_DIR / "main_text_direct_contrasts.csv").set_index("contrast_label")
     q05_direct = pd.read_csv(Q05_DIR / "main_text_direct_contrasts.csv").set_index("contrast_label")
 
     return {
-        "q7_heart_vs_base": f"{q7_summary.loc['christian_pre', 'j1_heart_shift_rate'] * 100:.1f}%",
-        "q7_expl_vs_base": f"{q7_summary.loc['christian_post', 'semantic_score_controlled_delta_vs_baseline'] * 100:.1f}%",
-        "q7_heart_direct": _fmt_pp(
+        "baseline_labels": ["J1 act", "J1 heart", "Explanation", "J1→J2 heart"],
+        "baseline_q7": [
+            float(q7_summary.loc["christian_pre", "j1_act_shift_rate"]),
+            float(q7_summary.loc["christian_pre", "j1_heart_shift_rate"]),
+            float(q7_summary.loc["christian_post", "semantic_score_controlled_delta_vs_baseline"]),
+            float(q7_summary.loc["christian_post", "j2_heart_revision_rate"]),
+        ],
+        "baseline_q05": [
+            float(q05_summary.loc["christian_pre", "j1_act_shift_rate"]),
+            float(q05_summary.loc["christian_pre", "j1_heart_shift_rate"]),
+            float(q05_summary.loc["christian_post", "semantic_score_controlled_delta_vs_baseline"]),
+            float(q05_summary.loc["christian_post", "j2_heart_revision_rate"]),
+        ],
+        "direct_rows": [
+            {
+                "label": "J1 heart\nC-pre - S-pre",
+                "q7_est": float(q7_direct.loc["C-pre - S-pre on J1 heart shift", "qwen_7b_estimate_pp"]) / 100.0,
+                "q7_low": float(q7_direct.loc["C-pre - S-pre on J1 heart shift", "qwen_7b_ci_low_pp"]) / 100.0,
+                "q7_high": float(q7_direct.loc["C-pre - S-pre on J1 heart shift", "qwen_7b_ci_high_pp"]) / 100.0,
+                "q05_est": float(q05_direct.loc["C-pre - S-pre on J1 heart shift", "qwen_05b_estimate_pp"]) / 100.0,
+                "q05_low": float(q05_direct.loc["C-pre - S-pre on J1 heart shift", "qwen_05b_ci_low_pp"]) / 100.0,
+                "q05_high": float(q05_direct.loc["C-pre - S-pre on J1 heart shift", "qwen_05b_ci_high_pp"]) / 100.0,
+            },
+            {
+                "label": "Controlled explanation\nC-post - S-post",
+                "q7_est": float(q7_direct.loc["C-post - S-post on controlled semantic score", "qwen_7b_estimate_pp"]) / 100.0,
+                "q7_low": float(q7_direct.loc["C-post - S-post on controlled semantic score", "qwen_7b_ci_low_pp"]) / 100.0,
+                "q7_high": float(q7_direct.loc["C-post - S-post on controlled semantic score", "qwen_7b_ci_high_pp"]) / 100.0,
+                "q05_est": float(q05_direct.loc["C-post - S-post on controlled semantic score", "qwen_05b_estimate_pp"]) / 100.0,
+                "q05_low": float(q05_direct.loc["C-post - S-post on controlled semantic score", "qwen_05b_ci_low_pp"]) / 100.0,
+                "q05_high": float(q05_direct.loc["C-post - S-post on controlled semantic score", "qwen_05b_ci_high_pp"]) / 100.0,
+            },
+        ],
+        "q7_heart_direct_text": _fmt_pp(
             q7_direct.loc["C-pre - S-pre on J1 heart shift", "qwen_7b_estimate_pp"],
             q7_direct.loc["C-pre - S-pre on J1 heart shift", "qwen_7b_ci_low_pp"],
             q7_direct.loc["C-pre - S-pre on J1 heart shift", "qwen_7b_ci_high_pp"],
         ),
-        "q7_controlled_direct": _fmt_pp(
+        "q7_controlled_direct_text": _fmt_pp(
             q7_direct.loc["C-post - S-post on controlled semantic score", "qwen_7b_estimate_pp"],
             q7_direct.loc["C-post - S-post on controlled semantic score", "qwen_7b_ci_low_pp"],
             q7_direct.loc["C-post - S-post on controlled semantic score", "qwen_7b_ci_high_pp"],
         ),
-        "q05_heart_direct": _fmt_pp(
-            q05_direct.loc["C-pre - S-pre on J1 heart shift", "qwen_05b_estimate_pp"],
-            q05_direct.loc["C-pre - S-pre on J1 heart shift", "qwen_05b_ci_low_pp"],
-            q05_direct.loc["C-pre - S-pre on J1 heart shift", "qwen_05b_ci_high_pp"],
-        ),
-        "q05_controlled_direct": _fmt_pp(
-            q05_direct.loc["C-post - S-post on controlled semantic score", "qwen_05b_estimate_pp"],
-            q05_direct.loc["C-post - S-post on controlled semantic score", "qwen_05b_ci_low_pp"],
-            q05_direct.loc["C-post - S-post on controlled semantic score", "qwen_05b_ci_high_pp"],
-        ),
-        "q05_expl_vs_base": f"{q05_summary.loc['christian_post', 'semantic_score_controlled_delta_vs_baseline'] * 100:.1f}%",
     }
 
 
 def build_study_overview_figure(output_path: Path = OUTPUT_PATH) -> Path:
     values = _load_values()
 
-    fig = plt.figure(figsize=(15.5, 8.7), facecolor="white")
-    ax = fig.add_axes([0, 0, 1, 1])
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, 1)
-    ax.axis("off")
-
-    navy = "#17324D"
-    muted = "#5C6C7B"
-    border = "#D7E0EA"
-    blue = "#4C78A8"
-    red = "#D64F4F"
-    teal = "#1B7F79"
-    gold = "#F0B94B"
-    purple = "#6B6FB0"
-    pale_blue = "#EEF4FB"
-    pale_teal = "#EEF9F7"
-    pale_red = "#FFF1F1"
-    pale_gold = "#FFF7E6"
-    pale_purple = "#F3F2FC"
+    plt.rcParams.update({"font.size": 11, "axes.titlesize": 12, "axes.labelsize": 11})
+    fig = plt.figure(figsize=(15.8, 8.9), facecolor="white")
+    gs = fig.add_gridspec(
+        3,
+        12,
+        height_ratios=[0.95, 1.0, 1.25],
+        left=0.045,
+        right=0.985,
+        top=0.89,
+        bottom=0.11,
+        hspace=0.34,
+        wspace=0.26,
+    )
 
     fig.text(
         0.05,
         0.955,
-        "Judgment before justification: what the experiment actually tests and supports",
+        "Judgment before justification: a cleaner view of what the study tests",
         ha="left",
         va="top",
-        fontsize=22,
+        fontsize=23,
         fontweight="bold",
-        color=navy,
+        color=NAVY,
     )
     fig.text(
         0.05,
         0.918,
-        "A stage-separated, matched-control study on Moral Stories-derived everyday scenarios using Qwen 2.5 7B and 0.5B.",
+        "The release uses a staged Moral Stories design, a matched secular control, and two Qwen sizes to separate first-pass judgment from post-hoc explanation.",
         ha="left",
         va="top",
         fontsize=12.5,
-        color=muted,
+        color=MUTED,
     )
 
-    top_y = 0.69
-    top_h = 0.17
-    w = 0.27
-    xs = [0.05, 0.365, 0.68]
-
-    _box(
-        ax,
-        (xs[0], top_y),
-        w,
-        top_h,
-        "Benchmark setup\n\n150-item candidate pool\nLocked 30 dev / 120 eval\n40-item judgment-only sanity subset\nEveryday Moral Stories-derived A/B vignettes",
-        fc=pale_gold,
-        ec=gold,
-        fontsize=12.2,
-        weight="bold",
+    _card(
+        fig.add_subplot(gs[0, 0:4]),
+        "Benchmark",
+        [
+            "150-item candidate pool",
+            "Locked 30 dev / 120 eval",
+            "40-item judgment-only sanity subset",
+            "Everyday Moral Stories-derived A/B items",
+        ],
+        fc=PALE_GOLD,
+        ec=GOLD,
     )
-    _box(
-        ax,
-        (xs[1], top_y),
-        w,
-        top_h,
-        "Framing conditions\n\nChristian heart-focused frame\nvs matched secular motive-focused control\nEach can appear either before J1 or after J1",
-        fc=pale_blue,
-        ec=blue,
-        fontsize=12.0,
-        weight="bold",
+    _card(
+        fig.add_subplot(gs[0, 4:8]),
+        "Matched framing design",
+        [
+            "Christian heart-focused frame",
+            "vs secular motive-focused control",
+            "Frame can appear before J1 or after J1",
+            "Baseline remains unframed",
+        ],
+        fc=PALE_BLUE,
+        ec=BLUE,
     )
-    _box(
-        ax,
-        (xs[2], top_y),
-        w,
-        top_h,
-        "Models and decoding\n\nqwen2.5:7b-instruct\nqwen2.5:0.5b-instruct\nDeterministic decoding\nTemperature 0.0, seed 42",
-        fc=pale_purple,
-        ec=purple,
-        fontsize=12.0,
-        weight="bold",
+    _card(
+        fig.add_subplot(gs[0, 8:12]),
+        "Models and decoding",
+        [
+            "qwen2.5:7b-instruct",
+            "qwen2.5:0.5b-instruct",
+            "Deterministic decoding",
+            "Temperature 0.0, seed 42",
+        ],
+        fc=PALE_PURPLE,
+        ec=PURPLE,
     )
 
-    fig.text(0.05, 0.63, "Stage-separated protocol", fontsize=15, fontweight="bold", color=navy)
-    stage_y = 0.48
-    stage_h = 0.11
-    stage_w = 0.22
-    _box(ax, (0.08, stage_y), stage_w, stage_h, "Stage 1: J1\nFirst-pass exposed judgment\nJSON only: overall_problematic + heart_worse", fc=pale_blue, ec=blue, fontsize=12.0, weight="bold")
-    _box(ax, (0.39, stage_y), stage_w, stage_h, "Stage E\nPost-hoc explanation\nFocus label + one sentence tied to J1", fc=pale_teal, ec=teal, fontsize=12.0, weight="bold")
-    _box(ax, (0.70, stage_y), stage_w, stage_h, "Stage 2: J2\nRe-judgment after explanation\nSecondary revision check", fc=pale_red, ec=red, fontsize=12.0, weight="bold")
-    _arrow(ax, (0.30, stage_y + stage_h / 2), (0.39, stage_y + stage_h / 2))
-    _arrow(ax, (0.61, stage_y + stage_h / 2), (0.70, stage_y + stage_h / 2))
+    protocol_ax = fig.add_subplot(gs[1, 0:8])
+    protocol_ax.set_axis_off()
+    protocol_ax.text(0.0, 1.05, "Stage-separated protocol", transform=protocol_ax.transAxes, fontsize=15, fontweight="bold", color=NAVY)
+    protocol_ax.text(0.0, 0.93, "The frame enters either before J1 or in the gap between J1 and explanation.", transform=protocol_ax.transAxes, fontsize=10.4, color=MUTED)
 
-    _box(
-        ax,
-        (0.08, 0.35),
-        0.36,
-        0.09,
-        "What the design identifies\n\nJ1 isolates first-pass exposed judgment before explanation appears.",
-        fc="#F9FBFD",
-        ec=border,
-        fontsize=12.0,
-        weight="bold",
-    )
-    _box(
-        ax,
-        (0.56, 0.35),
-        0.36,
-        0.09,
-        "Why the matched control matters\n\nChristian-specific effects are tested against a secular motive-focused control, not just baseline.",
-        fc="#F9FBFD",
-        ec=border,
-        fontsize=12.0,
-        weight="bold",
-    )
+    stage_specs = [
+        (0.02, 0.18, 0.25, 0.58, PALE_BLUE, BLUE, "J1", "First-pass judgment", "Two forced A/B judgments"),
+        (0.37, 0.18, 0.25, 0.58, PALE_TEAL, TEAL, "E", "Explanation", "Focus label plus one sentence"),
+        (0.72, 0.18, 0.25, 0.58, PALE_RED, RED, "J2", "Re-judgment", "Act and heart after explanation"),
+    ]
+    for x, y, w, h, fc, ec, stage, title, body in stage_specs:
+        patch = FancyBboxPatch(
+            (x, y),
+            w,
+            h,
+            boxstyle="round,pad=0.015,rounding_size=0.04",
+            linewidth=1.6,
+            facecolor=fc,
+            edgecolor=ec,
+            transform=protocol_ax.transAxes,
+        )
+        protocol_ax.add_patch(patch)
+        protocol_ax.text(x + 0.035, y + h - 0.09, stage, transform=protocol_ax.transAxes, fontsize=11.4, fontweight="bold", color=NAVY, va="top")
+        protocol_ax.text(x + 0.035, y + h - 0.26, title, transform=protocol_ax.transAxes, fontsize=11.5, fontweight="bold", color=NAVY, va="top")
+        protocol_ax.text(x + 0.035, y + 0.14, body, transform=protocol_ax.transAxes, fontsize=9.6, color=NAVY, va="bottom")
+    _arrow(protocol_ax, (0.27, 0.47), (0.37, 0.47))
+    _arrow(protocol_ax, (0.62, 0.47), (0.72, 0.47))
+    _mini_badge(protocol_ax, (0.255, 0.80), 0.17, "Pre conditions insert the frame here", fc="#F7FAFE", ec=BORDER)
+    _mini_badge(protocol_ax, (0.605, 0.80), 0.19, "Post conditions insert the frame here", fc="#FFF9F2", ec=BORDER)
 
-    lower_y = 0.145
-    lower_h = 0.14
-    _box(
-        ax,
-        (0.05, lower_y),
-        0.28,
-        lower_h,
-        "What is measured\n\nJ1: act shift and heart shift\nE: coarse label, raw score,\ncontrolled semantic score\nJ2: act and heart revision",
-        fc=pale_teal,
-        ec=teal,
-        fontsize=11.2,
-        weight="bold",
-    )
-    _box(
-        ax,
-        (0.365, lower_y),
-        0.27,
-        lower_h,
-        "Baseline-relative movement\n\n7B: Christian pre changes J1 heart on "
-        + values["q7_heart_vs_base"]
-        + ".\n7B: Christian post changes controlled explanation score by "
-        + values["q7_expl_vs_base"]
-        + " vs baseline.\n0.5B: Christian post explanation change is "
-        + values["q05_expl_vs_base"]
-        + ".",
-        fc=pale_blue,
-        ec=blue,
-        fontsize=10.7,
-        weight="bold",
-    )
-    _box(
-        ax,
-        (0.67, lower_y),
-        0.28,
-        lower_h,
-        "Calibrated evidence pattern\n\n7B direct J1 heart contrast: "
-        + values["q7_heart_direct"]
-        + "\n7B controlled explanation contrast: "
-        + values["q7_controlled_direct"]
-        + "\n0.5B attenuates the story:\n"
-        + values["q05_heart_direct"]
-        + "\n"
-        + values["q05_controlled_direct"],
-        fc=pale_red,
-        ec=red,
-        fontsize=10.0,
-        weight="bold",
-    )
+    logic_ax = fig.add_subplot(gs[1, 8:12])
+    logic_ax.set_axis_off()
+    logic_ax.text(0.0, 1.05, "Why the design is identifiable", transform=logic_ax.transAxes, fontsize=15, fontweight="bold", color=NAVY)
+    logic_cards = [
+        (0.02, 0.67, "J1 isolates exposed judgment", "The first judgment is collected before any explanation is requested."),
+        (0.02, 0.36, "Matched control calibrates the claim", "Christian effects are tested against a secular motive-focused frame, not just baseline."),
+        (0.02, 0.05, "J2 checks downstream revision pressure", "If explanation changes but J2 stays stable, the effect is not a broad judgment rewrite."),
+    ]
+    for x, y, title, body in logic_cards:
+        patch = FancyBboxPatch(
+            (x, y),
+            0.96,
+            0.23,
+            boxstyle="round,pad=0.015,rounding_size=0.04",
+            linewidth=1.2,
+            facecolor="#FAFBFD",
+            edgecolor=BORDER,
+            transform=logic_ax.transAxes,
+        )
+        logic_ax.add_patch(patch)
+        logic_ax.text(x + 0.04, y + 0.16, title, transform=logic_ax.transAxes, fontsize=11.4, fontweight="bold", color=NAVY, va="top")
+        logic_ax.text(x + 0.04, y + 0.08, body, transform=logic_ax.transAxes, fontsize=9.6, color=MUTED, va="top", linespacing=1.20)
 
-    footer = FancyBboxPatch(
-        (0.05, 0.035),
-        0.90,
-        0.06,
-        boxstyle="round,pad=0.02,rounding_size=0.02",
-        linewidth=1.4,
-        facecolor="#F4F7FB",
-        edgecolor=border,
+    bar_ax = fig.add_subplot(gs[2, 0:6])
+    categories = values["baseline_labels"]
+    x = np.arange(len(categories))
+    width = 0.34
+    q7_vals = np.array(values["baseline_q7"], dtype=float)
+    q05_vals = np.array(values["baseline_q05"], dtype=float)
+    bar_ax.bar(x - width / 2, q7_vals, width=width, color=BLUE, alpha=0.96, label="Qwen 2.5 7B")
+    bar_ax.bar(x + width / 2, q05_vals, width=width, color=BLUE, alpha=0.35, label="Qwen 2.5 0.5B")
+    for xi, q7, q05 in zip(x, q7_vals, q05_vals, strict=True):
+        bar_ax.text(xi - width / 2, q7 + 0.003, f"{q7 * 100:.1f}%", ha="center", va="bottom", fontsize=9.4, color=NAVY)
+        bar_ax.text(xi + width / 2, q05 + 0.003, f"{q05 * 100:.1f}%", ha="center", va="bottom", fontsize=9.4, color=MUTED)
+    bar_ax.set_title("Relative to baseline, explanation moves more than act-level judgment", loc="left", fontsize=11.8, fontweight="bold", color=NAVY)
+    bar_ax.set_xticks(x)
+    bar_ax.set_xticklabels(categories)
+    bar_ax.set_ylim(0, 0.115)
+    bar_ax.yaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
+    bar_ax.set_ylabel("Items moved vs baseline")
+    bar_ax.grid(axis="y", color="#D8DDE5", linewidth=0.8)
+    bar_ax.set_axisbelow(True)
+    bar_ax.spines["top"].set_visible(False)
+    bar_ax.spines["right"].set_visible(False)
+    bar_ax.spines["left"].set_color("#CAD2DC")
+    bar_ax.spines["bottom"].set_color("#CAD2DC")
+    bar_ax.legend(frameon=False, ncol=2, loc="upper left")
+
+    forest_ax = fig.add_subplot(gs[2, 6:12])
+    rows = values["direct_rows"]
+    ypos = np.arange(len(rows))[::-1]
+    forest_ax.axvline(0, color="#808080", linewidth=1.0)
+    for y, row in zip(ypos, rows, strict=True):
+        forest_ax.plot([row["q7_low"], row["q7_high"]], [y + 0.10, y + 0.10], color=RED, linewidth=2.2)
+        forest_ax.scatter(row["q7_est"], y + 0.10, color=RED, edgecolor="#4F2525", linewidth=0.8, s=76, zorder=3)
+        forest_ax.plot([row["q05_low"], row["q05_high"]], [y - 0.10, y - 0.10], color=TEAL, linewidth=2.2)
+        forest_ax.scatter(row["q05_est"], y - 0.10, color=TEAL, edgecolor="#175954", linewidth=0.8, s=76, zorder=3)
+    forest_ax.set_yticks(ypos)
+    forest_ax.set_yticklabels([row["label"] for row in rows])
+    forest_ax.set_title("What survives matched control is much more modest", loc="left", fontsize=11.8, fontweight="bold", color=NAVY)
+    forest_ax.set_xlim(-0.15, 0.08)
+    forest_ax.xaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
+    forest_ax.set_xlabel("Christian minus matched secular control")
+    forest_ax.grid(axis="x", color="#D8DDE5", linewidth=0.8)
+    forest_ax.set_axisbelow(True)
+    forest_ax.spines["top"].set_visible(False)
+    forest_ax.spines["right"].set_visible(False)
+    forest_ax.spines["left"].set_color("#CAD2DC")
+    forest_ax.spines["bottom"].set_color("#CAD2DC")
+    forest_ax.legend(
+        handles=[
+            Line2D([0], [0], marker="o", color=RED, lw=2.0, markersize=7, label="Qwen 2.5 7B"),
+            Line2D([0], [0], marker="o", color=TEAL, lw=2.0, markersize=7, label="Qwen 2.5 0.5B"),
+        ],
+        frameon=False,
+        loc="lower right",
     )
-    ax.add_patch(footer)
-    ax.text(
+    fig.text(
         0.5,
-        0.065,
-        "Claim boundary: the clearest supported contribution is stage dissociation. Explanation is more prompt-sensitive than first-pass judgment, but the Christian-specific residual is modest or unstable under matched control.",
+        0.04,
+        "Main supported claim: stage dissociation. Explanation moves more than first-pass judgment relative to baseline, but the uniquely Christian-specific residual is modest or unstable under matched control.",
         ha="center",
         va="center",
-        fontsize=12.0,
+        fontsize=12.4,
         fontweight="bold",
-        color=navy,
-        wrap=True,
+        color=NAVY,
+        bbox={"boxstyle": "round,pad=0.55", "facecolor": "#F5F8FC", "edgecolor": BORDER, "linewidth": 1.2},
     )
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(output_path, dpi=300)
+    fig.savefig(output_path, dpi=300, bbox_inches="tight")
     plt.close(fig)
     return output_path
 
