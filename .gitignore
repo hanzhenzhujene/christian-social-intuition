@@ -22,6 +22,10 @@ data/processed/*
 !data/processed/item_review_v1.csv
 
 outputs/runs/*
+!outputs/runs/qwen2.5_7b_instruct_eval_v2.jsonl
+!outputs/runs/qwen2.5_7b_instruct_eval_v2.manifest.json
+!outputs/runs/qwen2.5_0.5b_instruct_eval_v2.jsonl
+!outputs/runs/qwen2.5_0.5b_instruct_eval_v2.manifest.json
 outputs/tmp*
 outputs/analysis/*
 !outputs/analysis/final_readout.md

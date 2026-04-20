@@ -229,12 +229,14 @@ It is needed to determine whether explanation text actually supports the model's
 - Run dates:
   - not recorded in the active manifests
 - Key result files:
-  - `outputs/runs/qwen2.5_7b_instruct_eval_locked_v1.jsonl`
+  - `outputs/runs/qwen2.5_7b_instruct_eval_v2.jsonl`
   - `outputs/runs/qwen2.5_0.5b_instruct_eval_v2.jsonl`
 - Key analysis dirs:
   - `outputs/analysis/qwen2.5_7b_instruct_eval_v2/`
   - `outputs/analysis/qwen2.5_0.5b_instruct_eval_v2/`
   - `outputs/analysis/final_combined_v2/`
+- Legacy note:
+  - `outputs/runs/qwen2.5_7b_instruct_eval_v2.jsonl` is a metadata-normalized export of the legacy locked-v1 raw run, preserving decoded content while backfilling current schema fields.
 - Skipped metrics:
   - `human_consistency_annotation:no_annotation_file`
   - `family_audit:no_family_audit_rows`

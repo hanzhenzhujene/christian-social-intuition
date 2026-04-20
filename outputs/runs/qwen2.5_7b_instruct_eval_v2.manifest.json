@@ -1,0 +1,45 @@
+{
+  "run_id": "selected_v2",
+  "model": "qwen2.5:7b-instruct",
+  "split": "eval",
+  "item_count": 120,
+  "sanity_item_count": 40,
+  "seed": 42,
+  "temperature": 0.0,
+  "max_judgment_tokens": 80,
+  "max_explanation_tokens": 100,
+  "condition_set": [
+    "baseline",
+    "secular_pre",
+    "christian_pre",
+    "secular_post",
+    "christian_post",
+    "baseline_judgment_only"
+  ],
+  "frame_mode": "selected",
+  "frames_config_version": "frames_v2",
+  "frames_path": "configs/frames.yaml",
+  "config_path": "configs/experiment.yaml",
+  "output_path": "outputs/runs/qwen2.5_7b_instruct_eval_v2.jsonl",
+  "condition_variants": {
+    "baseline": [
+      "none"
+    ],
+    "secular_pre": [
+      "secular_v1"
+    ],
+    "christian_pre": [
+      "christian_v1"
+    ],
+    "secular_post": [
+      "secular_v1"
+    ],
+    "christian_post": [
+      "christian_v1"
+    ],
+    "baseline_judgment_only": [
+      "none"
+    ]
+  },
+  "derived_from_legacy_source": "outputs/runs/qwen2.5_7b_instruct_eval_locked_v1.jsonl"
+}

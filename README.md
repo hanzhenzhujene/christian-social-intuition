@@ -128,14 +128,15 @@ PYTHONPATH=src python -m christian_social_intuition.cli run-experiment \
   --model qwen2.5:7b-instruct \
   --split eval \
   --frame-mode selected \
-  --run-id selected_v2
+  --run-id selected_v2 \
+  --output outputs/runs/qwen2.5_7b_instruct_eval_v2.jsonl
 ```
 
 ### Analyze the run
 
 ```bash
 PYTHONPATH=src python -m christian_social_intuition.cli analyze-results \
-  --results outputs/runs/qwen2.5_7b_instruct_eval_locked_v1.jsonl \
+  --results outputs/runs/qwen2.5_7b_instruct_eval_v2.jsonl \
   --frames-path configs/frames.yaml \
   --output-dir outputs/analysis/qwen2.5_7b_instruct_eval_v2
 ```
@@ -144,11 +145,12 @@ For the smaller-model comparison, replace the model and result path with:
 
 - `qwen2.5:0.5b-instruct`
 - `outputs/runs/qwen2.5_0.5b_instruct_eval_v2.jsonl`
+- the same `--run-id selected_v2` pattern, with `--output outputs/runs/qwen2.5_0.5b_instruct_eval_v2.jsonl`
 
 ### Regenerate the README figures
 
 ```bash
-PYTHONPATH=src python -m christian_social_intuition.readme_research_advance_figure
+PYTHONPATH=src python -m christian_social_intuition.study_overview_figure
 PYTHONPATH=src python -m christian_social_intuition.readme_summary_figure
 ```
 

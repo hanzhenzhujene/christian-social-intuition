@@ -25,7 +25,7 @@
 
 \title{Judgment Before Justification: Christian Framing and Stage Dissociation in LLM Moral Evaluation}
 \author{Anonymous Local Draft}
-\date{April 8, 2026}
+\date{April 20, 2026}
 
 \begin{document}
 \maketitle
@@ -37,7 +37,7 @@ Prompt-based studies of LLM morality often evaluate a single response that bundl
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/study_overview_main.png}
-\caption{Overview of the project question, staged design, model comparison, and calibrated claim boundary. The figure is a study map rather than an inferential result: it summarizes the benchmark setup, the \texttt{J1 $\rightarrow$ E $\rightarrow$ J2} protocol, and the paper's central interpretive point that prompt sensitivity appears more clearly in post-hoc explanation than in first-pass exposed judgment.}
+\caption{Data-informed overview of the completed study. The schematic summarizes the actual benchmark sizes (150-item candidate pool, 30 locked development items, 120 locked evaluation items, and a 40-item judgment-only sanity subset), the \texttt{J1 $\rightarrow$ E $\rightarrow$ J2} protocol, the matched Christian-versus-secular framing design, and the calibrated evidence pattern from the completed Qwen runs. It is an overview figure, not a standalone inferential result.}
 \label{fig:overview}
 \end{figure}
 
@@ -706,12 +706,15 @@ Each result row records:
 
 \paragraph{Key result files.}
 \begin{itemize}
-  \item \texttt{outputs/runs/qwen2.5\_7b\_instruct\_eval\_locked\_v1.jsonl}
+  \item \texttt{outputs/runs/qwen2.5\_7b\_instruct\_eval\_v2.jsonl}
   \item \texttt{outputs/runs/qwen2.5\_0.5b\_instruct\_eval\_v2.jsonl}
   \item \texttt{outputs/analysis/qwen2.5\_7b\_instruct\_eval\_v2/}
   \item \texttt{outputs/analysis/qwen2.5\_0.5b\_instruct\_eval\_v2/}
   \item \texttt{outputs/analysis/final\_combined\_v2/}
 \end{itemize}
+
+\paragraph{Legacy note.}
+The active 7B v2 result file is a metadata-normalized export of the legacy locked-v1 raw run. It preserves the decoded judgments and explanations while backfilling the reproducibility fields used by the current schema and analysis manifests.
 
 \paragraph{Skipped metrics in the active manifests.}
 \begin{itemize}

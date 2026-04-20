@@ -1,4 +1,7 @@
 model,contrast,estimate
+qwen2.5:7b-instruct,christian_minus_secular_pre_j1_act,-0.008333333333333333
+qwen2.5:7b-instruct,christian_minus_secular_pre_j1_heart,0.016666666666666663
+qwen2.5:7b-instruct,christian_minus_secular_post_semantic_controlled,-0.04999999999999999
 qwen2.5:0.5b-instruct,christian_minus_secular_pre_j1_act,0.0
 qwen2.5:0.5b-instruct,christian_minus_secular_pre_j1_heart,-0.008333333333333333
 qwen2.5:0.5b-instruct,christian_minus_secular_post_semantic_controlled,0.025

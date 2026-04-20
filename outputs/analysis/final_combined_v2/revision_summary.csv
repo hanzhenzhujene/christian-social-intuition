@@ -1,4 +1,9 @@
 model,condition,n_items,j2_act_revision_rate,j2_heart_revision_rate,act_a_to_b_count,act_b_to_a_count,heart_a_to_b_count,heart_b_to_a_count,toward_moral_option_rate,away_from_moral_option_rate
+qwen2.5:7b-instruct,baseline,120,0.008333333333333333,0.025,1,0,1,2,0.008333333333333333,0.0
+qwen2.5:7b-instruct,secular_pre,120,0.0,0.008333333333333333,0,0,0,1,0.0,0.0
+qwen2.5:7b-instruct,christian_pre,120,0.0,0.008333333333333333,0,0,0,1,0.0,0.0
+qwen2.5:7b-instruct,secular_post,120,0.03333333333333333,0.08333333333333333,4,0,2,8,0.016666666666666666,0.016666666666666666
+qwen2.5:7b-instruct,christian_post,120,0.008333333333333333,0.06666666666666667,1,0,1,7,0.008333333333333333,0.0
 qwen2.5:0.5b-instruct,baseline,120,0.0,0.008333333333333333,0,0,0,1,0.0,0.0
 qwen2.5:0.5b-instruct,secular_pre,120,0.0,0.0,0,0,0,0,0.0,0.0
 qwen2.5:0.5b-instruct,christian_pre,120,0.0,0.0,0,0,0,0,0.0,0.0
