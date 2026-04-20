@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite the project using the metadata below."
+title: "Christian Framing x the Social Intuitionist Model for LLMs"
+type: software
+version: 0.1.0
+date-released: 2026-04-20
+authors:
+  - family-names: Zhu
+    given-names: Hanzhen
+repository-code: "https://github.com/hanzhenzhujene/christian-social-intuition"
+license: MIT
+abstract: >-
+  A stage-separated benchmark and analysis pipeline for testing whether
+  Christian heart-focused framing changes first-pass exposed moral judgment
+  or mainly reshapes post-hoc explanation in LLM moral evaluation.

@@ -1,10 +1,33 @@
 # Paper Build
 
+This directory contains the canonical manuscript source and release-facing figure assets.
+
 - Main LaTeX source: `main.tex`
 - Compiled PDF: `main.pdf`
 - Local figure assets: `figures/`
 
-Build command:
+## Recommended build path
+
+From the repository root:
+
+```bash
+make release-check
+```
+
+That command:
+
+- runs the test suite
+- rebuilds the analysis bundles from the committed selected-v2 raw runs
+- regenerates the README and paper figures
+- recompiles `paper/main.pdf`
+
+If you only want to recompile the manuscript without refreshing the analysis artifacts:
+
+```bash
+make paper
+```
+
+## Manual LaTeX build
 
 ```bash
 cd /Users/hanzhenzhu/Desktop/Christian_Social_intuition/paper
@@ -12,8 +35,8 @@ pdflatex -interaction=nonstopmode -halt-on-error main.tex
 pdflatex -interaction=nonstopmode -halt-on-error main.tex
 ```
 
-Notes:
+## Scope notes
 
-- The paper is self-contained inside `paper/`, including copied figure files.
-- The current build is a local draft and still treats human-coded explanation consistency as pending.
-- References are intentionally minimal in this version and should be expanded before submission.
+- The figures under `paper/figures/` are copied release artifacts generated from `outputs/analysis/`.
+- The manuscript treats human-coded judgment-explanation consistency as pending and does not claim completed annotation-based results.
+- The current public release is calibrated to the completed selected-v2 Qwen runs documented in `outputs/runs/`.

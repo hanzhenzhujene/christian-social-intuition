@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Prompt templates and frame-loading utilities for the staged moral-evaluation protocol."""
+
 from pathlib import Path
 
 import yaml

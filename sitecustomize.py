@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Ensure the src/ layout is importable in local shells before installation."""
+
 import sys
 from pathlib import Path
 

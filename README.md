@@ -6,33 +6,65 @@
 
 ![Study overview](paper/figures/study_overview_main.png)
 
-## Why This Repository Is An Advance
+## Why This Repository Exists
 
-Most prompt-effect papers on LLM morality, values, or personas evaluate one bundled answer: a judgment plus a rationale. That setup is useful for benchmarking, but it leaves one central identification problem unresolved:
+Most prompt-effect papers on LLM morality, values, or personas score a single bundled answer: judgment plus rationale. That setup is useful for benchmarking, but it leaves one central identification problem unresolved:
 
 **when the output changes, did the model actually change its first-pass judgment, or did it mainly change how it explained itself?**
 
-This repository is designed to answer that question more cleanly. It adds four pieces that are usually missing in prompt studies:
+This repository is designed to answer that question directly. It adds four pieces that are usually missing in prompt studies:
 
 - **stage separation**: `J1` first-pass judgment, `E` explanation, `J2` re-judgment
 - a **matched secular motive-focused control**, not only a baseline
 - **lexical-echo control** before claiming semantic explanation change
-- a **secondary revision check** to see whether explanation movement actually propagates into later judgment
+- a **secondary revision check** to test whether explanation movement propagates into later judgment
 
-The religious-framing case study is the application. The broader contribution is a stronger experimental design for identifying **where prompting acts**.
+The Christian-framing case study is the application. The broader contribution is a reusable evaluation design for identifying **where prompting acts**.
+
+## Quickstart
+
+If you want to reproduce the released paper-facing artifacts from the committed raw runs:
+
+```bash
+make setup
+make release-check
+```
+
+This will:
+
+- install pinned dependencies
+- run the test suite
+- rebuild model-specific and combined analysis bundles
+- regenerate paper/README figures
+- recompile [paper/main.pdf](paper/main.pdf)
+
+Expected refreshed outputs:
+
+- `outputs/analysis/qwen2.5_7b_instruct_eval_v2/`
+- `outputs/analysis/qwen2.5_0.5b_instruct_eval_v2/`
+- `outputs/analysis/final_combined_v2/`
+- `paper/figures/`
+- `paper/main.pdf`
+
+If you want to rerun the selected-v2 experiments themselves, you need a local Ollama-compatible endpoint with both Qwen models available:
+
+```bash
+make rerun-selected-v2
+make release-check
+```
 
 ## What This Lets You Test That Bundled Evaluations Cannot
 
 | Question | Standard bundled answer | This repository |
 |---|---|---|
 | Did prompting change the model's decision? | Ambiguous | Measured directly at `J1` |
-| Did prompting only change the justification style? | Hard to isolate | Measured at `E`, with lexical-echo control |
+| Did prompting only change the justification style? | Hard to isolate | Measured directly at `E`, with lexical-echo control |
 | Does the effect survive a matched non-religious control? | Often not tested | Christian vs secular motive-focused contrast |
 | Does explanation movement change later judgment? | Usually invisible | Checked with `J1 -> J2` revision |
 
 This is the core research value of the project: it turns a vague prompt-effect question into a more identifiable mechanism question.
 
-## Main Takeaway
+## Main Empirical Takeaway
 
 The strongest evidence in this repository is a **mechanism distinction**, not a robust Christian-specific advantage claim.
 
@@ -66,92 +98,65 @@ If you are studying prompt effects, the most transferable lesson here is:
 
 **do not infer judgment change from explanation change alone.**
 
-## What This Repository Contributes
+## Repository Map
 
-- A stage-separated moral-evaluation benchmark built from **everyday Moral Stories scenarios**, not only trolley-style dilemmas.
-- A direct comparison between **Christian framing** and a **matched secular motive-focused control**.
-- Explanation analysis that separates:
-  - **lexical echo**
-  - **raw semantic explanation score**
-  - **controlled semantic explanation score**
-- A same-family scale comparison:
-  - `qwen2.5:7b-instruct`
-  - `qwen2.5:0.5b-instruct`
-- Paper-ready artifacts:
-  - figures
-  - direct-contrast tables
-  - qualitative examples
-  - appendix materials
-  - reproducibility manifests
+```text
+src/christian_social_intuition/   core benchmark, experiment, parsing, analysis, and figure scripts
+configs/                          experiment defaults and frame/lexicon definitions
+data/processed/                   locked benchmark splits and review sheet
+outputs/runs/                     committed selected-v2 raw runs for the two Qwen models
+outputs/analysis/                 paper-facing analysis bundles
+paper/                            canonical LaTeX paper, figures, and compiled PDF
+docs/final_revision/              appendix, reviewer-risk memo, and release-facing notes
+tests/                            unit tests for parsing, metrics, item construction, and analysis
+```
 
-## Repository Structure
+For the broader documentation layout, see [docs/README.md](docs/README.md).
 
-- `src/christian_social_intuition/`
-  Core code for item construction, staged prompting, experiment execution, parsing, analysis, and README figure generation.
-- `configs/frames.yaml`
-  Frame text plus the lexicons used for lexical-echo and controlled-semantic scoring.
-- `configs/experiment.yaml`
-  Default run settings and presets.
-- `data/processed/`
-  Candidate pool, locked dev/eval splits, and item review sheet.
-- `outputs/analysis/qwen2.5_7b_instruct_eval_v2/`
-  Main-model analysis bundle.
-- `outputs/analysis/qwen2.5_0.5b_instruct_eval_v2/`
-  Smaller-model comparison bundle.
-- `paper/`
-  Canonical manuscript, figures, and compiled PDF.
-- `docs/final_revision/`
-  Final-calibration appendix, tables, reviewer-risk memo, and claim-boundary notes.
+## Reproducibility Details
 
-## Reproducing the Main Results
+### Pinned environment
 
-### Install
+- Python `>=3.11`
+- locked runtime dependencies in [requirements.lock.txt](requirements.lock.txt)
+- locked dev dependencies in [requirements-dev.lock.txt](requirements-dev.lock.txt)
+
+### Command-line entrypoint
+
+After installation, the package exposes:
+
+```bash
+csi-sim --help
+```
+
+### Manual command equivalents
+
+If you prefer not to use the Makefile, the core commands are:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install -e .
-```
-
-### Build the benchmark
-
-```bash
-PYTHONPATH=src python -m christian_social_intuition.cli fetch-moral-stories
-PYTHONPATH=src python -m christian_social_intuition.cli build-items
-PYTHONPATH=src python -m christian_social_intuition.cli apply-item-review
-```
-
-### Run the staged experiment
-
-```bash
-PYTHONPATH=src python -m christian_social_intuition.cli run-experiment \
-  --model qwen2.5:7b-instruct \
-  --split eval \
-  --frame-mode selected \
-  --run-id selected_v2 \
-  --output outputs/runs/qwen2.5_7b_instruct_eval_v2.jsonl
-```
-
-### Analyze the run
-
-```bash
+python -m pip install -r requirements.lock.txt -r requirements-dev.lock.txt
+python -m pip install -e . --no-deps
+pytest -q
 PYTHONPATH=src python -m christian_social_intuition.cli analyze-results \
   --results outputs/runs/qwen2.5_7b_instruct_eval_v2.jsonl \
   --frames-path configs/frames.yaml \
   --output-dir outputs/analysis/qwen2.5_7b_instruct_eval_v2
-```
-
-For the smaller-model comparison, replace the model and result path with:
-
-- `qwen2.5:0.5b-instruct`
-- `outputs/runs/qwen2.5_0.5b_instruct_eval_v2.jsonl`
-- the same `--run-id selected_v2` pattern, with `--output outputs/runs/qwen2.5_0.5b_instruct_eval_v2.jsonl`
-
-### Regenerate the README figures
-
-```bash
+PYTHONPATH=src python -m christian_social_intuition.cli analyze-results \
+  --results outputs/runs/qwen2.5_0.5b_instruct_eval_v2.jsonl \
+  --frames-path configs/frames.yaml \
+  --output-dir outputs/analysis/qwen2.5_0.5b_instruct_eval_v2
+PYTHONPATH=src python -m christian_social_intuition.cli analyze-results \
+  --results outputs/runs/qwen2.5_7b_instruct_eval_v2.jsonl outputs/runs/qwen2.5_0.5b_instruct_eval_v2.jsonl \
+  --frames-path configs/frames.yaml \
+  --output-dir outputs/analysis/final_combined_v2
+PYTHONPATH=src python -m christian_social_intuition.cli build-paper-figures \
+  --analysis-dirs outputs/analysis/qwen2.5_7b_instruct_eval_v2 outputs/analysis/qwen2.5_0.5b_instruct_eval_v2 \
+  --output-dir paper/figures
 PYTHONPATH=src python -m christian_social_intuition.study_overview_figure
 PYTHONPATH=src python -m christian_social_intuition.readme_summary_figure
+cd paper && pdflatex -interaction=nonstopmode -halt-on-error main.tex && pdflatex -interaction=nonstopmode -halt-on-error main.tex
 ```
 
 ## Key Artifacts
@@ -160,6 +165,7 @@ PYTHONPATH=src python -m christian_social_intuition.readme_summary_figure
 
 - [Main PDF](paper/main.pdf)
 - [LaTeX source](paper/main.tex)
+- [Paper build notes](paper/README.md)
 
 ### Model-specific analysis
 
@@ -167,6 +173,7 @@ PYTHONPATH=src python -m christian_social_intuition.readme_summary_figure
 - [Qwen 7B direct contrasts](outputs/analysis/qwen2.5_7b_instruct_eval_v2/main_text_direct_contrasts.csv)
 - [Qwen 0.5B report](outputs/analysis/qwen2.5_0.5b_instruct_eval_v2/analysis_report.md)
 - [Qwen 0.5B direct contrasts](outputs/analysis/qwen2.5_0.5b_instruct_eval_v2/main_text_direct_contrasts.csv)
+- [Combined final bundle](outputs/analysis/final_combined_v2/analysis_report.md)
 
 ### Final revision package
 
@@ -197,17 +204,11 @@ Two pieces remain explicitly pending:
 - human judgment-explanation consistency annotation
 - full paraphrase-family audit results
 
-## If You Want To Build On This
+## License and Data Note
 
-The most reusable design lesson is simple:
-
-1. separate judgment from explanation
-2. include a matched control, not only a baseline
-3. control for lexical echo before claiming semantic explanation change
-4. test whether explanation movement actually propagates into later judgment
-
-That logic should transfer to many other prompting domains where interpretability matters more than leaderboard-style single scores.
+- Code in this repository is released under the [MIT License](LICENSE).
+- The benchmark items are derived from Moral Stories source material; please check upstream dataset terms when reusing the underlying data outside this repository.
 
 ## Citation
 
-If this repository is useful in your work, please cite the paper or link the repository.
+If this repository is useful in your work, please cite the paper and/or the repository metadata in [CITATION.cff](CITATION.cff).

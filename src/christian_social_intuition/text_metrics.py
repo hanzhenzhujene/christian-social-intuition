@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Lexical-echo and controlled-semantic explanation metrics used in the paper."""
+
 import re
 from typing import Iterable
 

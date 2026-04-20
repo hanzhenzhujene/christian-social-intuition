@@ -8,8 +8,10 @@ version = "0.1.0"
 description = "Stage-separated Christian framing x Social Intuitionist experiment harness for LLMs."
 readme = "README.md"
 requires-python = ">=3.11"
+license = {text = "MIT"}
 dependencies = [
   "matplotlib>=3.8",
+  "numpy>=1.26",
   "pandas>=2.1",
   "PyYAML>=6.0",
   "statsmodels>=0.14",
@@ -20,6 +22,9 @@ dev = ["pytest>=8.0"]
 
 [project.scripts]
 csi-sim = "christian_social_intuition.cli:main"
+
+[project.urls]
+Repository = "https://github.com/hanzhenzhujene/christian-social-intuition"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Minimal chat-completions client for the local Ollama-compatible HTTP endpoint."""
+
 import json
 import time
 from typing import Any

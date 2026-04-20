@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Command-line entrypoints for data prep, experiment execution, analysis, and figure builds."""
+
 import argparse
 import json
 from pathlib import Path

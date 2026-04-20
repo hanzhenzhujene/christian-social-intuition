@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Build the repository's study-overview figure from the current released artifacts."""
+
 from pathlib import Path
 
 import matplotlib.pyplot as plt

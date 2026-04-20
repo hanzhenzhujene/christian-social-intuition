@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Recover structured judgments and explanations from occasionally messy model outputs."""
+
 import json
 import re
 

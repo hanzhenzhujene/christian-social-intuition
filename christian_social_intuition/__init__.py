@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Compatibility shim so local imports work even before editable installation."""
+
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parent

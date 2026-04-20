@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Aggregate staged-run outputs into paper-facing tables, figures, and reports."""
+
 import json
 import math
 import warnings

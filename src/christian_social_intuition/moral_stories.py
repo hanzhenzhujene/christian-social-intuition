@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Fetch and load the Moral Stories source dataset used to build benchmark items."""
+
 import json
 from pathlib import Path
 from typing import Iterable

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Generate the compact README summary figure from the released analysis bundles."""
+
 from pathlib import Path
 
 import matplotlib.pyplot as plt

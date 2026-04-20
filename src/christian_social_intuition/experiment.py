@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Run the staged J1→E→J2 protocol against local chat-completions-compatible models."""
+
 import json
 from pathlib import Path
 from typing import Iterable

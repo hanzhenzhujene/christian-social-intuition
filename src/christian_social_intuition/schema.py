@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Shared schema objects and canonical condition/tag labels used across the project."""
+
 from dataclasses import asdict, dataclass, field
 from typing import Any
 

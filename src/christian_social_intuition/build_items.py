@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Construct, review, and lock Moral Stories-derived contrastive evaluation items."""
+
 import csv
 import json
 import math

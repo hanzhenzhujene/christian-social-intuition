@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Paired bootstrap, permutation, and effect-size helpers for matched-control contrasts."""
+
 import math
 from typing import Iterable
 
