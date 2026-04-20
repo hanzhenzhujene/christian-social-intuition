@@ -37,7 +37,7 @@ Prompt-based studies of LLM morality often evaluate a single response that bundl
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/study_overview_main.png}
-\caption{Design overview plus compact evidence snapshot from the completed Qwen runs. The figure combines the locked benchmark sizes, the \texttt{J1 $\rightarrow$ E $\rightarrow$ J2} protocol, the matched-control identification logic, and two visual summaries of what moves relative to baseline versus what survives the stricter Christian-versus-secular comparison. It is an orientation figure, not a standalone inferential result.}
+\caption{Design overview plus a compact evidence snapshot from the completed Qwen runs. The figure summarizes the locked benchmark sizes, the \texttt{J1 $\rightarrow$ E $\rightarrow$ J2} protocol, and the difference between baseline-relative movement and direct Christian-versus-secular residuals. It is an orientation figure, not a standalone inferential result.}
 \label{fig:overview}
 \end{figure}
 
@@ -188,10 +188,13 @@ These are treated as secondary mechanism checks rather than the primary estimand
 \paragraph{Dissociated explanation shift.}
 For the completed analysis, dissociated explanation shift is defined at item level as:
 \[
-\text{DissociatedShift}_{i,c} =
-\mathbb{I}\left[\text{ControlledSemanticScore}_{i,c} - \text{ControlledSemanticScore}_{i,b} > 0\right]
-\cdot
+\begin{aligned}
+\text{DissociatedShift}_{i,c}
+&=
+\mathbb{I}\left[\text{ControlledSemanticScore}_{i,c} - \text{ControlledSemanticScore}_{i,b} > 0\right] \\
+&\quad \cdot
 \mathbb{I}\left[\text{J1ActShift}_{i,c}=0 \land \text{J1HeartShift}_{i,c}=0\right]
+\end{aligned}
 \]
 Higher values mean explanation moved while first-pass exposed judgment stayed fixed relative to baseline.
 
@@ -286,7 +289,7 @@ Once the matched secular motive-focused control is used directly, the Christian-
 
 In 7B, the direct Christian-minus-secular contrast on the raw explanation score is -1.67 percentage points with interval [-15.83, 11.67], $p=0.908$, $d_z=-0.02$. After lexical-echo control, the direct contrast becomes -5.00 points with interval [-13.33, 1.67], $p=0.295$, $d_z=-0.12$. These are not only weak paired results; they are also not Christian-positive. The current 7B evidence therefore does \emph{not} support a stable uniquely Christian explanation advantage after matched-control comparison and lexical control.
 
-In 0.5B, the same pattern is weaker and less stable. The raw explanation contrast is -4.17 points [-20.83, 10.00], $p=0.654$, $d_z=-0.05$. The controlled semantic contrast is +2.50 points [-0.83, 6.67], $p=0.372$, $d_z=0.12$. This residual is small, unstable, and inconsistent in sign with the 7B result. The same-family comparison therefore attenuates, rather than reinforces, a Christian-specific explanation story.
+In 0.5B, the same pattern is weaker and less stable. The raw explanation contrast is -4.17 points [-20.83, 10.00], $p=0.654$, $d_z=-0.05$. The controlled semantic contrast is +2.50 points [-0.83, 6.67], $p=0.372$, $d_z=0.12$. This residual is small, unstable, and inconsistent in sign with the 7B result. Across scale, the explanation result is attenuated and sign-unstable rather than reliably Christian-specific.
 
 \begin{figure}[t]
 \centering
@@ -833,7 +836,6 @@ Data slice: the two main matched-control contrasts, pre-heart and post controlle
 \subsection{Figure 6}
 Data slice: exploratory heterogeneity by primary tension tag. Infer: where motive-sensitive effects might concentrate. Do not infer: confirmed category-level findings.
 
-\section*{References}
 \begin{thebibliography}{9}
 
 \bibitem{haidt2001}

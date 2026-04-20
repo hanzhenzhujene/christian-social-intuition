@@ -3,6 +3,7 @@ from __future__ import annotations
 """Generate the README summary figure from the released analysis bundles."""
 
 from pathlib import Path
+import textwrap
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -29,10 +30,11 @@ def _load_tables() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFra
 def _save_release_png(fig: plt.Figure, output_path: Path) -> Path:
     """Save the README figure as an RGB PNG that compiles reliably in LaTeX."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(output_path, dpi=300, bbox_inches="tight", facecolor="white")
-    with Image.open(output_path) as image:
-        if image.mode != "RGB":
-            image.convert("RGB").save(output_path)
+    tmp_path = output_path.with_suffix(".tmp.png")
+    fig.savefig(tmp_path, dpi=300, bbox_inches="tight", facecolor="white")
+    with Image.open(tmp_path) as image:
+        image.convert("RGB").save(output_path, format="PNG")
+    tmp_path.unlink(missing_ok=True)
     return output_path
 
 
@@ -50,20 +52,20 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
         "muted": "#4E4E4E",
         "grid": "#D9DDE3",
     }
-    plt.rcParams.update({"font.size": 11, "axes.titlesize": 12, "axes.labelsize": 11, "figure.titlesize": 18})
+    plt.rcParams.update({"font.size": 10.5, "axes.titlesize": 11.5, "axes.labelsize": 10.5, "figure.titlesize": 17})
 
-    fig = plt.figure(figsize=(15.6, 7.2), facecolor="white")
+    fig = plt.figure(figsize=(14.2, 7.9), facecolor="white")
     gs = fig.add_gridspec(
         2,
         3,
-        height_ratios=[1.0, 0.17],
-        width_ratios=[1.10, 1.0, 0.84],
-        left=0.05,
-        right=0.985,
-        top=0.83,
-        bottom=0.08,
-        hspace=0.18,
-        wspace=0.28,
+        height_ratios=[1.0, 0.22],
+        width_ratios=[1.06, 1.0, 0.9],
+        left=0.055,
+        right=0.982,
+        top=0.85,
+        bottom=0.075,
+        hspace=0.16,
+        wspace=0.30,
     )
     ax_a = fig.add_subplot(gs[0, 0])
     ax_b = fig.add_subplot(gs[0, 1])
@@ -76,7 +78,7 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
         "From prompt movement to calibrated evidence",
         ha="left",
         va="top",
-        fontsize=18.5,
+        fontsize=17.2,
         fontweight="bold",
         color=colors["title"],
     )
@@ -86,7 +88,7 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
         "The staged benchmark lets us compare baseline movement, matched-control residuals, and scale attenuation in one place.",
         ha="left",
         va="top",
-        fontsize=11.0,
+        fontsize=10.7,
         color=colors["muted"],
     )
 
@@ -115,7 +117,14 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
         ax_a.scatter(q05, yi, color=category_color, s=82, zorder=3, edgecolor="#304050", linewidth=0.8, alpha=0.35)
         ax_a.text(q7 + 0.003, yi + 0.10, f"{q7 * 100:.1f}%", ha="left", va="center", fontsize=9.1, color=colors["title"])
         ax_a.text(q05 + 0.003, yi - 0.10, f"{q05 * 100:.1f}%", ha="left", va="center", fontsize=9.1, color=colors["muted"])
-    ax_a.set_title("A. Relative to baseline, explanation movement is largest", loc="left", color=colors["title"], fontweight="bold", fontsize=11.6)
+    ax_a.set_title(
+        "A. Relative to baseline,\nexplanation movement is largest",
+        loc="left",
+        color=colors["title"],
+        fontweight="bold",
+        fontsize=11.2,
+        pad=12,
+    )
     ax_a.set_yticks(y)
     ax_a.set_yticklabels(categories)
     ax_a.set_xlim(0, 0.115)
@@ -135,6 +144,7 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
         frameon=False,
         loc="lower right",
         ncol=2,
+        fontsize=9.3,
     )
 
     contrast_order = [
@@ -156,7 +166,14 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
         ax_b.scatter(est_7b, y + 0.12, color=colors["q7"], s=60, zorder=3, edgecolor="#4A1F30", linewidth=0.8)
         ax_b.plot([lo_05b, hi_05b], [y - 0.12, y - 0.12], color=colors["q05"], lw=2.2)
         ax_b.scatter(est_05b, y - 0.12, color=colors["q05"], s=60, zorder=3, edgecolor="#19504C", linewidth=0.8)
-    ax_b.set_title("B. Matched control shrinks the Christian-specific residual", loc="left", color=colors["title"], fontweight="bold", fontsize=11.6)
+    ax_b.set_title(
+        "B. Matched control shrinks\nthe Christian-specific residual",
+        loc="left",
+        color=colors["title"],
+        fontweight="bold",
+        fontsize=11.2,
+        pad=12,
+    )
     ax_b.set_yticks(y_positions)
     ax_b.set_yticklabels([name for name, _ in contrast_order])
     ax_b.set_xlim(-0.16, 0.08)
@@ -209,8 +226,15 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
             capsize=3,
             linewidth=1.5,
         )
-        ax_c.text(1.05, q05_est, label, color=color, va="center", fontsize=9.5, linespacing=1.1)
-    ax_c.set_title("C. Same-family scale comparison shows attenuation", loc="left", color=colors["title"], fontweight="bold", fontsize=11.6)
+        ax_c.text(1.04, q05_est, label, color=color, va="center", fontsize=9.2, linespacing=1.05, clip_on=False)
+    ax_c.set_title(
+        "C. Same-family scale comparison\nshows attenuation",
+        loc="left",
+        color=colors["title"],
+        fontweight="bold",
+        fontsize=11.2,
+        pad=12,
+    )
     ax_c.set_xticks(x_c)
     ax_c.set_xticklabels(["7B", "0.5B"])
     ax_c.set_ylim(-0.15, 0.08)
@@ -224,17 +248,20 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
     ax_c.spines["bottom"].set_color("#C7CED7")
 
     ax_footer.axis("off")
-    ax_footer.plot([0.0, 1.0], [0.85, 0.85], transform=ax_footer.transAxes, color="#D5DEE8", linewidth=1.0)
-    ax_footer.text(0.0, 0.34, "Takeaway", fontsize=11.3, fontweight="bold", color=colors["title"], va="center", ha="left", transform=ax_footer.transAxes)
+    ax_footer.plot([0.0, 1.0], [0.88, 0.88], transform=ax_footer.transAxes, color="#D5DEE8", linewidth=1.0)
+    ax_footer.text(0.0, 0.46, "Takeaway", fontsize=11.0, fontweight="bold", color=colors["title"], va="center", ha="left", transform=ax_footer.transAxes)
     ax_footer.text(
         0.115,
-        0.34,
-        "The strongest supported insight is stage dissociation: explanation moves readily relative to baseline, while the Christian-specific residual becomes modest, unstable, or null under matched control.",
-        fontsize=10.6,
+        0.46,
+        textwrap.fill(
+            "The strongest supported insight is stage dissociation: explanation moves readily relative to baseline, while the Christian-specific residual becomes modest, unstable, or null under matched control.",
+            width=122,
+        ),
+        fontsize=10.2,
         color=colors["muted"],
         va="center",
         ha="left",
-        linespacing=1.25,
+        linespacing=1.28,
         transform=ax_footer.transAxes,
     )
 
