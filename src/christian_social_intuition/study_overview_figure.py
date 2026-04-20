@@ -46,51 +46,63 @@ def _save_release_png(fig: plt.Figure, output_path: Path) -> Path:
 def _card(ax, title: str, lines: list[str], *, fc: str, ec: str) -> None:
     ax.set_axis_off()
     patch = FancyBboxPatch(
-        (0.01, 0.05),
-        0.98,
-        0.90,
+        (0.02, 0.08),
+        0.96,
+        0.84,
         boxstyle="round,pad=0.016,rounding_size=0.05",
-        linewidth=1.5,
+        linewidth=1.1,
         facecolor=fc,
         edgecolor=ec,
         transform=ax.transAxes,
     )
     ax.add_patch(patch)
-    ax.text(0.05, 0.77, title, transform=ax.transAxes, fontsize=13, fontweight="bold", color=NAVY, va="top")
+    ax.text(0.07, 0.76, title, transform=ax.transAxes, fontsize=12.4, fontweight="bold", color=NAVY, va="top")
     ax.text(
-        0.05,
-        0.60,
+        0.07,
+        0.56,
         "\n".join(lines),
         transform=ax.transAxes,
-        fontsize=11.1,
+        fontsize=10.5,
         color=NAVY,
         va="top",
-        linespacing=1.35,
+        linespacing=1.48,
     )
 
 
-def _mini_badge(ax, xy, width, text, *, fc, ec, color=NAVY) -> None:
+def _soft_box(ax, xy, width, height, title, body, *, fc, ec, dashed=False) -> None:
     patch = FancyBboxPatch(
         xy,
         width,
-        0.11,
+        height,
         boxstyle="round,pad=0.02,rounding_size=0.03",
         linewidth=1.2,
         facecolor=fc,
         edgecolor=ec,
         transform=ax.transAxes,
+        linestyle=(0, (3, 2)) if dashed else "solid",
     )
     ax.add_patch(patch)
     ax.text(
         xy[0] + width / 2,
-        xy[1] + 0.055,
-        text,
+        xy[1] + height * 0.62,
+        title,
         transform=ax.transAxes,
         ha="center",
         va="center",
-        fontsize=10.2,
+        fontsize=9.4,
         fontweight="bold",
-        color=color,
+        color=NAVY,
+    )
+    ax.text(
+        xy[0] + width / 2,
+        xy[1] + height * 0.28,
+        body,
+        transform=ax.transAxes,
+        ha="center",
+        va="center",
+        fontsize=8.1,
+        color=MUTED,
+        linespacing=1.2,
     )
 
 
@@ -169,71 +181,67 @@ def build_study_overview_figure(output_path: Path = OUTPUT_PATH) -> Path:
     values = _load_values()
 
     plt.rcParams.update({"font.size": 11, "axes.titlesize": 12, "axes.labelsize": 11})
-    fig = plt.figure(figsize=(15.8, 8.9), facecolor="white")
+    fig = plt.figure(figsize=(16.4, 9.8), facecolor="white")
     gs = fig.add_gridspec(
-        3,
+        4,
         12,
-        height_ratios=[0.95, 1.0, 1.25],
+        height_ratios=[0.88, 1.04, 1.26, 0.18],
         left=0.045,
         right=0.985,
-        top=0.89,
-        bottom=0.11,
-        hspace=0.34,
-        wspace=0.26,
+        top=0.90,
+        bottom=0.08,
+        hspace=0.46,
+        wspace=0.34,
     )
 
     fig.text(
         0.05,
         0.955,
-        "Judgment before justification: a cleaner view of what the study tests",
+        "What the staged study actually separates",
         ha="left",
         va="top",
-        fontsize=23,
+        fontsize=22,
         fontweight="bold",
         color=NAVY,
     )
     fig.text(
         0.05,
         0.918,
-        "The release uses a staged Moral Stories design, a matched secular control, and two Qwen sizes to separate first-pass judgment from post-hoc explanation.",
+        "Moral Stories items, matched Christian versus secular framing, and two Qwen sizes are used to separate first-pass exposed judgment from post-hoc explanation.",
         ha="left",
         va="top",
-        fontsize=12.5,
+        fontsize=11.6,
         color=MUTED,
     )
-
     _card(
         fig.add_subplot(gs[0, 0:4]),
-        "Benchmark",
+        "Data",
         [
-            "150-item candidate pool",
-            "Locked 30 dev / 120 eval",
-            "40-item judgment-only sanity subset",
-            "Everyday Moral Stories-derived A/B items",
+            "• 120 locked eval items + 40 sanity items",
+            "• Everyday Moral Stories-derived A/B scenarios",
+            "• Manually reviewed and split before analysis",
         ],
         fc=PALE_GOLD,
         ec=GOLD,
     )
     _card(
         fig.add_subplot(gs[0, 4:8]),
-        "Matched framing design",
+        "Frames",
         [
-            "Christian heart-focused frame",
-            "vs secular motive-focused control",
-            "Frame can appear before J1 or after J1",
-            "Baseline remains unframed",
+            "• Christian heart-focused frame",
+            "• Matched secular motive-focused control",
+            "• Frame inserted either before J1 or after J1",
         ],
         fc=PALE_BLUE,
         ec=BLUE,
     )
     _card(
         fig.add_subplot(gs[0, 8:12]),
-        "Models and decoding",
+        "Models",
         [
-            "qwen2.5:7b-instruct",
-            "qwen2.5:0.5b-instruct",
-            "Deterministic decoding",
-            "Temperature 0.0, seed 42",
+            "• Qwen 2.5 7B and Qwen 2.5 0.5B",
+            "• Deterministic decoding in the released runs",
+            "• Temperature 0.0, seed 42",
         ],
         fc=PALE_PURPLE,
         ec=PURPLE,
@@ -241,13 +249,43 @@ def build_study_overview_figure(output_path: Path = OUTPUT_PATH) -> Path:
 
     protocol_ax = fig.add_subplot(gs[1, 0:8])
     protocol_ax.set_axis_off()
-    protocol_ax.text(0.0, 1.05, "Stage-separated protocol", transform=protocol_ax.transAxes, fontsize=15, fontweight="bold", color=NAVY)
-    protocol_ax.text(0.0, 0.93, "The frame enters either before J1 or in the gap between J1 and explanation.", transform=protocol_ax.transAxes, fontsize=10.4, color=MUTED)
+    protocol_ax.text(0.0, 1.02, "Where prompting can act", transform=protocol_ax.transAxes, fontsize=14.2, fontweight="bold", color=NAVY)
+    protocol_ax.text(
+        0.0,
+        0.90,
+        "Christian or secular text occupies one optional frame slot per condition, which makes timing interpretable.",
+        transform=protocol_ax.transAxes,
+        fontsize=10.0,
+        color=MUTED,
+    )
+
+    _soft_box(
+        protocol_ax,
+        (0.01, 0.33),
+        0.12,
+        0.22,
+        "Pre frame",
+        "*_pre only",
+        fc="#FBFCFE",
+        ec="#C8D4E2",
+        dashed=True,
+    )
+    _soft_box(
+        protocol_ax,
+        (0.39, 0.33),
+        0.12,
+        0.22,
+        "Post frame",
+        "*_post only",
+        fc="#FBFCFE",
+        ec="#C8D4E2",
+        dashed=True,
+    )
 
     stage_specs = [
-        (0.02, 0.18, 0.25, 0.58, PALE_BLUE, BLUE, "J1", "First-pass judgment", "Two forced A/B judgments"),
-        (0.37, 0.18, 0.25, 0.58, PALE_TEAL, TEAL, "E", "Explanation", "Focus label plus one sentence"),
-        (0.72, 0.18, 0.25, 0.58, PALE_RED, RED, "J2", "Re-judgment", "Act and heart after explanation"),
+        (0.17, 0.22, 0.19, 0.50, PALE_BLUE, BLUE, "J1", "First-pass judgment", "Forced A/B choice\nfor act and heart"),
+        (0.55, 0.22, 0.19, 0.50, PALE_TEAL, TEAL, "E", "Post-hoc explanation", "One focus label\nplus one sentence"),
+        (0.77, 0.22, 0.18, 0.50, PALE_RED, RED, "J2", "Re-judgment", "Same act and heart\nchoice after E"),
     ]
     for x, y, w, h, fc, ec, stage, title, body in stage_specs:
         patch = FancyBboxPatch(
@@ -261,61 +299,83 @@ def build_study_overview_figure(output_path: Path = OUTPUT_PATH) -> Path:
             transform=protocol_ax.transAxes,
         )
         protocol_ax.add_patch(patch)
-        protocol_ax.text(x + 0.035, y + h - 0.09, stage, transform=protocol_ax.transAxes, fontsize=11.4, fontweight="bold", color=NAVY, va="top")
-        protocol_ax.text(x + 0.035, y + h - 0.26, title, transform=protocol_ax.transAxes, fontsize=11.5, fontweight="bold", color=NAVY, va="top")
-        protocol_ax.text(x + 0.035, y + 0.14, body, transform=protocol_ax.transAxes, fontsize=9.6, color=NAVY, va="bottom")
-    _arrow(protocol_ax, (0.27, 0.47), (0.37, 0.47))
-    _arrow(protocol_ax, (0.62, 0.47), (0.72, 0.47))
-    _mini_badge(protocol_ax, (0.255, 0.80), 0.17, "Pre conditions insert the frame here", fc="#F7FAFE", ec=BORDER)
-    _mini_badge(protocol_ax, (0.605, 0.80), 0.19, "Post conditions insert the frame here", fc="#FFF9F2", ec=BORDER)
+        protocol_ax.text(x + 0.03, y + h - 0.08, stage, transform=protocol_ax.transAxes, fontsize=10.8, fontweight="bold", color=NAVY, va="top")
+        protocol_ax.text(x + 0.03, y + h - 0.20, title, transform=protocol_ax.transAxes, fontsize=11.3, fontweight="bold", color=NAVY, va="top")
+        protocol_ax.text(x + 0.03, y + 0.10, body, transform=protocol_ax.transAxes, fontsize=9.2, color=NAVY, va="bottom", linespacing=1.2)
+    _arrow(protocol_ax, (0.14, 0.47), (0.17, 0.47))
+    _arrow(protocol_ax, (0.36, 0.47), (0.39, 0.47))
+    _arrow(protocol_ax, (0.52, 0.47), (0.55, 0.47))
+    _arrow(protocol_ax, (0.74, 0.47), (0.77, 0.47))
 
     logic_ax = fig.add_subplot(gs[1, 8:12])
     logic_ax.set_axis_off()
-    logic_ax.text(0.0, 1.05, "Why the design is identifiable", transform=logic_ax.transAxes, fontsize=15, fontweight="bold", color=NAVY)
-    logic_cards = [
-        (0.02, 0.67, "J1 isolates exposed judgment", "The first judgment is collected before any explanation is requested."),
-        (0.02, 0.36, "Matched control calibrates the claim", "Christian effects are tested against a secular motive-focused frame, not just baseline."),
-        (0.02, 0.05, "J2 checks downstream revision pressure", "If explanation changes but J2 stays stable, the effect is not a broad judgment rewrite."),
-    ]
-    for x, y, title, body in logic_cards:
-        patch = FancyBboxPatch(
-            (x, y),
-            0.96,
-            0.23,
-            boxstyle="round,pad=0.015,rounding_size=0.04",
-            linewidth=1.2,
-            facecolor="#FAFBFD",
-            edgecolor=BORDER,
-            transform=logic_ax.transAxes,
-        )
-        logic_ax.add_patch(patch)
-        logic_ax.text(x + 0.04, y + 0.16, title, transform=logic_ax.transAxes, fontsize=11.4, fontweight="bold", color=NAVY, va="top")
-        logic_ax.text(x + 0.04, y + 0.08, body, transform=logic_ax.transAxes, fontsize=9.6, color=MUTED, va="top", linespacing=1.20)
+    logic_ax.text(0.0, 1.02, "How to interpret the stages", transform=logic_ax.transAxes, fontsize=14.2, fontweight="bold", color=NAVY)
+    logic_patch = FancyBboxPatch(
+        (0.02, 0.15),
+        0.96,
+        0.67,
+        boxstyle="round,pad=0.018,rounding_size=0.04",
+        linewidth=1.1,
+        facecolor="#FAFBFD",
+        edgecolor=BORDER,
+        transform=logic_ax.transAxes,
+    )
+    logic_ax.add_patch(logic_patch)
+    logic_ax.text(0.07, 0.77, "• J1 is the exposed first-pass judgment measure.", transform=logic_ax.transAxes, fontsize=10.7, color=NAVY, va="top")
+    logic_ax.text(
+        0.07,
+        0.58,
+        "• The matched secular motive-focused control tests whether\nChristian wording adds anything beyond generic motive salience.",
+        transform=logic_ax.transAxes,
+        fontsize=10.0,
+        color=NAVY,
+        va="top",
+        linespacing=1.25,
+    )
+    logic_ax.text(
+        0.07,
+        0.34,
+        "• J2 is a revision check: if explanation moves while J2 stays\nstable, the effect is mostly at the explanation layer.",
+        transform=logic_ax.transAxes,
+        fontsize=10.0,
+        color=NAVY,
+        va="top",
+        linespacing=1.25,
+    )
+    logic_ax.text(0.07, 0.08, "Sanity: baseline and judgment-only agree 1.0 / 1.0 in both models.", transform=logic_ax.transAxes, fontsize=9.3, color=MUTED, va="bottom")
 
-    bar_ax = fig.add_subplot(gs[2, 0:6])
+    baseline_ax = fig.add_subplot(gs[2, 0:6])
     categories = values["baseline_labels"]
-    x = np.arange(len(categories))
-    width = 0.34
     q7_vals = np.array(values["baseline_q7"], dtype=float)
     q05_vals = np.array(values["baseline_q05"], dtype=float)
-    bar_ax.bar(x - width / 2, q7_vals, width=width, color=BLUE, alpha=0.96, label="Qwen 2.5 7B")
-    bar_ax.bar(x + width / 2, q05_vals, width=width, color=BLUE, alpha=0.35, label="Qwen 2.5 0.5B")
-    for xi, q7, q05 in zip(x, q7_vals, q05_vals, strict=True):
-        bar_ax.text(xi - width / 2, q7 + 0.003, f"{q7 * 100:.1f}%", ha="center", va="bottom", fontsize=9.4, color=NAVY)
-        bar_ax.text(xi + width / 2, q05 + 0.003, f"{q05 * 100:.1f}%", ha="center", va="bottom", fontsize=9.4, color=MUTED)
-    bar_ax.set_title("Relative to baseline, explanation moves more than act-level judgment", loc="left", fontsize=11.8, fontweight="bold", color=NAVY)
-    bar_ax.set_xticks(x)
-    bar_ax.set_xticklabels(categories)
-    bar_ax.set_ylim(0, 0.115)
-    bar_ax.yaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
-    bar_ax.set_ylabel("Items moved vs baseline")
-    bar_ax.grid(axis="y", color="#D8DDE5", linewidth=0.8)
-    bar_ax.set_axisbelow(True)
-    bar_ax.spines["top"].set_visible(False)
-    bar_ax.spines["right"].set_visible(False)
-    bar_ax.spines["left"].set_color("#CAD2DC")
-    bar_ax.spines["bottom"].set_color("#CAD2DC")
-    bar_ax.legend(frameon=False, ncol=2, loc="upper left")
+    y = np.arange(len(categories))[::-1]
+    baseline_ax.set_title("A. Baseline-relative movement", loc="left", fontsize=11.8, fontweight="bold", color=NAVY)
+    for yi, q7, q05 in zip(y, q7_vals, q05_vals, strict=True):
+        baseline_ax.plot([min(q7, q05), max(q7, q05)], [yi, yi], color="#D4DDE8", linewidth=2.2, zorder=1)
+        baseline_ax.scatter(q7, yi, color=BLUE, s=84, zorder=3, edgecolor="#2E5E8E", linewidth=0.8)
+        baseline_ax.scatter(q05, yi, color="#B8C7D9", s=84, zorder=3, edgecolor="#94A7BD", linewidth=0.8)
+        baseline_ax.text(q7 + 0.003, yi + 0.11, f"{q7 * 100:.1f}%", fontsize=9.0, color=NAVY, va="center")
+        baseline_ax.text(q05 + 0.003, yi - 0.11, f"{q05 * 100:.1f}%", fontsize=9.0, color=MUTED, va="center")
+    baseline_ax.set_yticks(y)
+    baseline_ax.set_yticklabels(categories)
+    baseline_ax.set_xlim(0, 0.118)
+    baseline_ax.xaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
+    baseline_ax.set_xlabel("Items moved relative to baseline")
+    baseline_ax.grid(axis="x", color="#D8DDE5", linewidth=0.8)
+    baseline_ax.set_axisbelow(True)
+    baseline_ax.spines["top"].set_visible(False)
+    baseline_ax.spines["right"].set_visible(False)
+    baseline_ax.spines["left"].set_color("#CAD2DC")
+    baseline_ax.spines["bottom"].set_color("#CAD2DC")
+    baseline_ax.legend(
+        handles=[
+            Line2D([0], [0], marker="o", color=BLUE, lw=0, markersize=8, label="Qwen 2.5 7B"),
+            Line2D([0], [0], marker="o", color="#B8C7D9", lw=0, markersize=8, label="Qwen 2.5 0.5B"),
+        ],
+        frameon=False,
+        ncol=2,
+        loc="upper center",
+    )
 
     forest_ax = fig.add_subplot(gs[2, 6:12])
     rows = values["direct_rows"]
@@ -327,8 +387,8 @@ def build_study_overview_figure(output_path: Path = OUTPUT_PATH) -> Path:
         forest_ax.plot([row["q05_low"], row["q05_high"]], [y - 0.10, y - 0.10], color=TEAL, linewidth=2.2)
         forest_ax.scatter(row["q05_est"], y - 0.10, color=TEAL, edgecolor="#175954", linewidth=0.8, s=76, zorder=3)
     forest_ax.set_yticks(ypos)
-    forest_ax.set_yticklabels([row["label"] for row in rows])
-    forest_ax.set_title("What survives matched control is much more modest", loc="left", fontsize=11.8, fontweight="bold", color=NAVY)
+    forest_ax.set_yticklabels(["Heart residual", "Explanation residual"])
+    forest_ax.set_title("B. Matched-control residuals", loc="left", fontsize=11.8, fontweight="bold", color=NAVY)
     forest_ax.set_xlim(-0.15, 0.08)
     forest_ax.xaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
     forest_ax.set_xlabel("Christian minus matched secular control")
@@ -344,18 +404,20 @@ def build_study_overview_figure(output_path: Path = OUTPUT_PATH) -> Path:
             Line2D([0], [0], marker="o", color=TEAL, lw=2.0, markersize=7, label="Qwen 2.5 0.5B"),
         ],
         frameon=False,
-        loc="lower right",
+        loc="upper right",
     )
-    fig.text(
-        0.5,
-        0.04,
-        "Main supported claim: stage dissociation. Explanation moves more than first-pass judgment relative to baseline, but the uniquely Christian-specific residual is modest or unstable under matched control.",
-        ha="center",
+    footer_ax = fig.add_subplot(gs[3, 0:12])
+    footer_ax.set_axis_off()
+    footer_ax.plot([0.0, 1.0], [0.88, 0.88], transform=footer_ax.transAxes, color=BORDER, linewidth=1.0)
+    footer_ax.text(0.0, 0.32, "Takeaway", transform=footer_ax.transAxes, fontsize=11.4, fontweight="bold", color=NAVY, va="center")
+    footer_ax.text(
+        0.105,
+        0.32,
+        "The main supported pattern is stage dissociation: explanation moves more readily than first-pass judgment, while Christian-specific residuals become modest or unstable and J1→J2 revision stays rare.",
+        transform=footer_ax.transAxes,
+        fontsize=10.7,
+        color=MUTED,
         va="center",
-        fontsize=12.4,
-        fontweight="bold",
-        color=NAVY,
-        bbox={"boxstyle": "round,pad=0.55", "facecolor": "#F5F8FC", "edgecolor": BORDER, "linewidth": 1.2},
     )
 
     _save_release_png(fig, output_path)
