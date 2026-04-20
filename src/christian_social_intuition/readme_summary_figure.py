@@ -52,17 +52,17 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
     }
     plt.rcParams.update({"font.size": 11, "axes.titlesize": 12, "axes.labelsize": 11, "figure.titlesize": 18})
 
-    fig = plt.figure(figsize=(15.8, 7.7), facecolor="white")
+    fig = plt.figure(figsize=(15.6, 7.2), facecolor="white")
     gs = fig.add_gridspec(
         2,
         3,
-        height_ratios=[1.0, 0.22],
+        height_ratios=[1.0, 0.17],
         width_ratios=[1.10, 1.0, 0.84],
         left=0.05,
         right=0.985,
-        top=0.82,
+        top=0.83,
         bottom=0.08,
-        hspace=0.24,
+        hspace=0.18,
         wspace=0.28,
     )
     ax_a = fig.add_subplot(gs[0, 0])
@@ -76,7 +76,7 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
         "From prompt movement to calibrated evidence",
         ha="left",
         va="top",
-        fontsize=19,
+        fontsize=18.5,
         fontweight="bold",
         color=colors["title"],
     )
@@ -86,7 +86,7 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
         "The staged benchmark lets us compare baseline movement, matched-control residuals, and scale attenuation in one place.",
         ha="left",
         va="top",
-        fontsize=11.3,
+        fontsize=11.0,
         color=colors["muted"],
     )
 
@@ -107,21 +107,21 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
             q05_summary.loc["christian_post", "j2_heart_revision_rate"],
         ]
     )
-    x = np.arange(len(categories))
-    width = 0.34
     category_colors = [colors["act"], colors["heart"], colors["explanation"], colors["revision"]]
-    for idx, (category_color, x_val) in enumerate(zip(category_colors, x, strict=True)):
-        ax_a.bar(x_val - width / 2, q7_vals[idx], width=width, color=category_color, alpha=0.96)
-        ax_a.bar(x_val + width / 2, q05_vals[idx], width=width, color=category_color, alpha=0.35)
-        ax_a.text(x_val - width / 2, q7_vals[idx] + 0.003, f"{q7_vals[idx] * 100:.1f}%", ha="center", va="bottom", fontsize=9.5)
-        ax_a.text(x_val + width / 2, q05_vals[idx] + 0.003, f"{q05_vals[idx] * 100:.1f}%", ha="center", va="bottom", fontsize=9.5, color=colors["muted"])
-    ax_a.set_title("A. Relative to baseline, explanation movement is largest", loc="left", color=colors["title"], fontweight="bold", fontsize=11.8)
-    ax_a.set_xticks(x)
-    ax_a.set_xticklabels(categories)
-    ax_a.set_ylim(0, 0.115)
-    ax_a.yaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
-    ax_a.set_ylabel("Items moved vs baseline")
-    ax_a.grid(axis="y", color=colors["grid"], linewidth=0.8)
+    y = np.arange(len(categories))[::-1]
+    for yi, label, q7, q05, category_color in zip(y, categories, q7_vals, q05_vals, category_colors, strict=True):
+        ax_a.plot([min(q7, q05), max(q7, q05)], [yi, yi], color="#D0D7E0", linewidth=2.1, zorder=1)
+        ax_a.scatter(q7, yi, color=category_color, s=82, zorder=3, edgecolor="#304050", linewidth=0.8)
+        ax_a.scatter(q05, yi, color=category_color, s=82, zorder=3, edgecolor="#304050", linewidth=0.8, alpha=0.35)
+        ax_a.text(q7 + 0.003, yi + 0.10, f"{q7 * 100:.1f}%", ha="left", va="center", fontsize=9.1, color=colors["title"])
+        ax_a.text(q05 + 0.003, yi - 0.10, f"{q05 * 100:.1f}%", ha="left", va="center", fontsize=9.1, color=colors["muted"])
+    ax_a.set_title("A. Relative to baseline, explanation movement is largest", loc="left", color=colors["title"], fontweight="bold", fontsize=11.6)
+    ax_a.set_yticks(y)
+    ax_a.set_yticklabels(categories)
+    ax_a.set_xlim(0, 0.115)
+    ax_a.xaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
+    ax_a.set_xlabel("Items moved vs baseline")
+    ax_a.grid(axis="x", color=colors["grid"], linewidth=0.8)
     ax_a.set_axisbelow(True)
     ax_a.spines["top"].set_visible(False)
     ax_a.spines["right"].set_visible(False)
@@ -129,11 +129,11 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
     ax_a.spines["bottom"].set_color("#C7CED7")
     ax_a.legend(
         handles=[
-            Line2D([0], [0], color="#444444", lw=8, alpha=0.96, label="Qwen 7B"),
-            Line2D([0], [0], color="#777777", lw=8, alpha=0.35, label="Qwen 0.5B"),
+            Line2D([0], [0], marker="o", color="#444444", lw=0, alpha=0.96, label="Qwen 7B", markersize=7),
+            Line2D([0], [0], marker="o", color="#777777", lw=0, alpha=0.35, label="Qwen 0.5B", markersize=7),
         ],
         frameon=False,
-        loc="upper left",
+        loc="lower right",
         ncol=2,
     )
 
@@ -156,7 +156,7 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
         ax_b.scatter(est_7b, y + 0.12, color=colors["q7"], s=60, zorder=3, edgecolor="#4A1F30", linewidth=0.8)
         ax_b.plot([lo_05b, hi_05b], [y - 0.12, y - 0.12], color=colors["q05"], lw=2.2)
         ax_b.scatter(est_05b, y - 0.12, color=colors["q05"], s=60, zorder=3, edgecolor="#19504C", linewidth=0.8)
-    ax_b.set_title("B. Matched control shrinks the Christian-specific residual", loc="left", color=colors["title"], fontweight="bold", fontsize=11.8)
+    ax_b.set_title("B. Matched control shrinks the Christian-specific residual", loc="left", color=colors["title"], fontweight="bold", fontsize=11.6)
     ax_b.set_yticks(y_positions)
     ax_b.set_yticklabels([name for name, _ in contrast_order])
     ax_b.set_xlim(-0.16, 0.08)
@@ -181,7 +181,7 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
             "#D07A1F",
         ),
         (
-            "Controlled explanation residual",
+            "Controlled explanation\nresidual",
             float(q7_direct.loc["C-post - S-post on controlled semantic score", "qwen_7b_estimate_pp"]) / 100.0,
             float(q7_direct.loc["C-post - S-post on controlled semantic score", "qwen_7b_ci_low_pp"]) / 100.0,
             float(q7_direct.loc["C-post - S-post on controlled semantic score", "qwen_7b_ci_high_pp"]) / 100.0,
@@ -209,8 +209,8 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
             capsize=3,
             linewidth=1.5,
         )
-        ax_c.text(1.03, q05_est, label, color=color, va="center", fontsize=9.8)
-    ax_c.set_title("C. Same-family scale comparison shows attenuation", loc="left", color=colors["title"], fontweight="bold", fontsize=11.8)
+        ax_c.text(1.05, q05_est, label, color=color, va="center", fontsize=9.5, linespacing=1.1)
+    ax_c.set_title("C. Same-family scale comparison shows attenuation", loc="left", color=colors["title"], fontweight="bold", fontsize=11.6)
     ax_c.set_xticks(x_c)
     ax_c.set_xticklabels(["7B", "0.5B"])
     ax_c.set_ylim(-0.15, 0.08)
@@ -224,17 +224,18 @@ def build_readme_results_summary(output_path: Path = OUTPUT_PATH) -> Path:
     ax_c.spines["bottom"].set_color("#C7CED7")
 
     ax_footer.axis("off")
+    ax_footer.plot([0.0, 1.0], [0.85, 0.85], transform=ax_footer.transAxes, color="#D5DEE8", linewidth=1.0)
+    ax_footer.text(0.0, 0.34, "Takeaway", fontsize=11.3, fontweight="bold", color=colors["title"], va="center", ha="left", transform=ax_footer.transAxes)
     ax_footer.text(
-        0.5,
-        0.50,
-        "Takeaway: the strongest supported insight is stage dissociation. Explanation language moves readily relative to baseline, but the Christian-specific residual becomes modest, unstable, or null under matched control.",
-        fontsize=12.2,
-        fontweight="bold",
-        color=colors["title"],
+        0.115,
+        0.34,
+        "The strongest supported insight is stage dissociation: explanation moves readily relative to baseline, while the Christian-specific residual becomes modest, unstable, or null under matched control.",
+        fontsize=10.6,
+        color=colors["muted"],
         va="center",
-        ha="center",
-        linespacing=1.3,
-        bbox={"boxstyle": "round,pad=0.58", "facecolor": "#F4F7FB", "edgecolor": "#D5DEE8", "linewidth": 1.0},
+        ha="left",
+        linespacing=1.25,
+        transform=ax_footer.transAxes,
     )
 
     _save_release_png(fig, output_path)

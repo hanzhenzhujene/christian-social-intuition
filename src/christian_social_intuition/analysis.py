@@ -117,8 +117,8 @@ def _style_axis(ax: plt.Axes, *, grid_axis: str = "y") -> None:
 
 
 def _add_pre_post_bands(ax: plt.Axes, *, pre: tuple[float, float], post: tuple[float, float]) -> None:
-    ax.axhspan(pre[0], pre[1], color="#F4F8FC", alpha=0.95, zorder=0)
-    ax.axhspan(post[0], post[1], color="#FFF6EE", alpha=0.95, zorder=0)
+    ax.axhspan(pre[0], pre[1], color="#F7FAFD", alpha=1.0, zorder=0)
+    ax.axhspan(post[0], post[1], color="#FEF8F2", alpha=1.0, zorder=0)
 
 
 def _save_release_png(fig: plt.Figure, output_path: str | Path) -> Path:
@@ -1454,12 +1454,12 @@ def plot_first_pass_shift(summary_df: pd.DataFrame, output_path: str | Path) -> 
         Line2D([0], [0], marker="D", color=MEASURE_COLORS["heart"], label="J1 heart / motive worse", markersize=7, linestyle=""),
         Line2D([0, 1], [0, 0], color="#BEC6D1", linewidth=2.2, label="Within-condition gap"),
     ]
-    fig.suptitle("First-pass movement is concentrated in heart-level judgments", x=0.06, ha="left", fontweight="bold")
+    fig.suptitle("First-pass movement is concentrated in heart-level judgments", x=0.06, ha="left", fontweight="bold", fontsize=16)
     fig.text(
         0.06,
         0.92,
         "Within each timing, heart-level movement exceeds act-level movement. Ordering the rows by framing position makes the pre-versus-post distinction readable at a glance.",
-        fontsize=9,
+        fontsize=9.5,
         color="#4E4E4E",
     )
     fig.legend(handles=handles, frameon=False, loc="upper center", bbox_to_anchor=(0.5, 0.03), ncol=3)
@@ -1488,10 +1488,10 @@ def plot_explanation_layer_effect(summary_df: pd.DataFrame, output_path: str | P
     )
     metrics = [
         ("motive_focus_delta_vs_baseline", "Coarse motive/heart label", MEASURE_COLORS["coarse"]),
-        (raw_metric, "Raw Christian / heart-language score", MEASURE_COLORS["raw"]),
-        (controlled_metric, "Lexical-controlled semantic score", MEASURE_COLORS["controlled"]),
+        (raw_metric, "Raw semantic explanation score", MEASURE_COLORS["raw"]),
+        (controlled_metric, "Controlled semantic explanation score", MEASURE_COLORS["controlled"]),
     ]
-    fig, axes = plt.subplots(len(metrics), len(models), figsize=(12.8, 9.8), sharex="row", sharey=True)
+    fig, axes = plt.subplots(len(metrics), len(models), figsize=(13.1, 8.8), sharex="row", sharey=True)
     if len(models) == 1:
         axes = np.array([[ax] for ax in axes])
 
@@ -1554,13 +1554,13 @@ def plot_explanation_layer_effect(summary_df: pd.DataFrame, output_path: str | P
                     zorder=3,
                 )
             ax.set_yticks([0, 1])
-            ax.set_yticklabels([label for label, _, _ in timing_pairs])
+            ax.set_yticklabels(["Post-J1 frame", "Pre-J1 frame"])
             ax.invert_yaxis()
             ax.set_xlim(*metric_limits[metric])
             ax.xaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
-            ax.set_title(_model_label(model) if row_idx == 0 else "", fontsize=11)
+            ax.set_title(_model_label(model) if row_idx == 0 else "", fontsize=11.2)
             if col_idx == 0:
-                ax.set_ylabel(title)
+                ax.set_ylabel(title, rotation=0, ha="right", va="center", labelpad=58, fontsize=10.1)
             _style_axis(ax, grid_axis="x")
             if row_idx == len(metrics) - 1:
                 ax.set_xlabel("Change vs baseline")
@@ -1570,17 +1570,17 @@ def plot_explanation_layer_effect(summary_df: pd.DataFrame, output_path: str | P
         Line2D([0], [0], marker="D", color=FRAME_COLORS["christian"], markeredgecolor="#6C3B14", label="Christian frame", markersize=6.8, linestyle=""),
         Line2D([0, 1], [0, 0], color="#C5CBD4", linewidth=2.2, label="Within-timing comparison"),
     ]
-    fig.suptitle("Explanation movement is clear, but matched-control residuals remain weak", x=0.06, ha="left", fontweight="bold")
+    fig.suptitle("Explanation movement is clear, but matched-control residuals remain weak", x=0.06, ha="left", fontweight="bold", fontsize=16)
     fig.text(
         0.06,
-        0.95,
-        "Each row compares secular and Christian framing within the same timing. The controlled row is the key diagnostic layer because direct lexical echo has been removed.",
-        fontsize=9,
+        0.94,
+        "Each row compares secular and Christian framing within the same timing. The controlled row is the diagnostic one because direct lexical echo has already been removed.",
+        fontsize=9.5,
         color="#4E4E4E",
     )
     fig.legend(handles=handles, frameon=False, loc="upper center", bbox_to_anchor=(0.5, 0.03), ncol=3)
     fig.tight_layout()
-    fig.subplots_adjust(top=0.9, bottom=0.12)
+    fig.subplots_adjust(left=0.19, top=0.89, bottom=0.12, hspace=0.22, wspace=0.04)
     out = _save_release_png(fig, output_path)
     plt.close(fig)
     return out
@@ -1595,18 +1595,32 @@ def plot_judgment_explanation_dissociation(summary_df: pd.DataFrame, output_path
         else "semantic_controlled_delta_vs_baseline"
     )
     models = sorted(plot_df["model"].dropna().unique(), key=_model_sort_key)
-    fig, axes = plt.subplots(1, len(models), figsize=(12.0, 5.8), sharex=True, sharey=True)
+    fig, axes = plt.subplots(1, len(models), figsize=(12.0, 5.6), sharex=True, sharey=True)
     if len(models) == 1:
         axes = [axes]
     limit_min = min(float(plot_df["j1_heart_shift_rate"].min()), float(plot_df[y_metric].min()), 0.0) - 0.01
     limit_max = max(float(plot_df["j1_heart_shift_rate"].max()), float(plot_df[y_metric].max()), 0.01) + 0.02
+    label_offsets = {
+        "qwen2.5:7b-instruct": {
+            "secular_pre": (-36, -16),
+            "christian_pre": (16, 10),
+            "secular_post": (10, -10),
+            "christian_post": (10, 10),
+        },
+        "qwen2.5:0.5b-instruct": {
+            "secular_pre": (14, -18),
+            "christian_pre": (18, 10),
+            "secular_post": (10, -16),
+            "christian_post": (10, 10),
+        },
+    }
 
     for ax, model in zip(axes, models, strict=True):
         model_df = plot_df[plot_df["model"] == model]
         ax.axvline(0, color="#7A7A7A", linewidth=1.0)
         ax.axhline(0, color="#7A7A7A", linewidth=1.0)
         ax.plot([limit_min, limit_max], [limit_min, limit_max], linestyle="--", color="#B0B6BE", linewidth=1.2, zorder=0)
-        ax.fill_between([limit_min, limit_max], [limit_min, limit_max], limit_max, color="#F0F7F3", alpha=0.6, zorder=0)
+        ax.fill_between([limit_min, limit_max], [limit_min, limit_max], limit_max, color="#F3FAF5", alpha=0.8, zorder=0)
         for row in model_df.itertuples():
             ax.scatter(
                 row.j1_heart_shift_rate,
@@ -1625,9 +1639,9 @@ def plot_judgment_explanation_dissociation(summary_df: pd.DataFrame, output_path
                     "christian_post": "C-post",
                 }.get(row.condition, _condition_label(row.condition)),
                 (row.j1_heart_shift_rate, getattr(row, y_metric)),
-                xytext=(8, 9 if "christian" in row.condition else -14),
+                xytext=label_offsets.get(model, {}).get(row.condition, (8, 8)),
                 textcoords="offset points",
-                fontsize=9,
+                fontsize=8.8,
                 bbox={"boxstyle": "round,pad=0.18", "fc": "white", "ec": "none", "alpha": 0.82},
             )
         ax.set_title(_model_label(model), fontsize=11)
@@ -1647,12 +1661,12 @@ def plot_judgment_explanation_dissociation(summary_df: pd.DataFrame, output_path
         Line2D([0], [0], marker="o", color="none", markerfacecolor="#666666", markeredgecolor="#303030", label="Pre-J1 framing", markersize=7),
         Line2D([0], [0], marker="s", color="none", markerfacecolor="#666666", markeredgecolor="#303030", label="Post-J1 framing", markersize=7),
     ]
-    fig.suptitle("Explanation change can outpace first-pass judgment change", x=0.06, ha="left", fontweight="bold")
+    fig.suptitle("Explanation change can outpace first-pass judgment change", x=0.06, ha="left", fontweight="bold", fontsize=16)
     fig.text(
         0.06,
         0.92,
         "The dashed diagonal marks equal movement in the two stages. Points above that line indicate stronger explanation movement than first-pass heart movement.",
-        fontsize=9,
+        fontsize=9.5,
         color="#4E4E4E",
     )
     fig.legend(handles=handles, frameon=False, loc="upper center", bbox_to_anchor=(0.5, 0.03), ncol=4)
@@ -1694,7 +1708,8 @@ def plot_revision_figure(revision_df: pd.DataFrame, output_path: str | Path) -> 
                     linewidth=0.8,
                     zorder=3,
                 )
-                ax.text(value + x_max * 0.02, y, _format_pct_text(value), va="center", ha="left", fontsize=8.5, color="#4E4E4E")
+                if value > 0.0005:
+                    ax.text(value + x_max * 0.02, y, _format_pct_text(value), va="center", ha="left", fontsize=8.5, color="#4E4E4E")
             ax.set_title(_model_label(model) if row_idx == 0 else "", fontsize=11)
             ax.set_ylabel(title)
             ax.set_yticks(positions)
@@ -1706,12 +1721,12 @@ def plot_revision_figure(revision_df: pd.DataFrame, output_path: str | Path) -> 
                 ax.set_xlabel("Revision rate")
             _style_axis(ax, grid_axis="x")
 
-    fig.suptitle("J1-to-J2 revision remains rare", x=0.06, ha="left", fontweight="bold")
+    fig.suptitle("J1-to-J2 revision remains rare", x=0.06, ha="left", fontweight="bold", fontsize=16)
     fig.text(
         0.06,
         0.93,
         "Revision is treated as a secondary mechanism check rather than a primary estimand: most rates stay close to zero even when explanation language moves.",
-        fontsize=9,
+        fontsize=9.5,
         color="#4E4E4E",
     )
     fig.tight_layout()
@@ -1729,7 +1744,7 @@ def plot_heterogeneity(heterogeneity_df: pd.DataFrame, output_path: str | Path) 
         ("pre_heart_shift", "Christian - secular pre on J1 heart shift"),
         ("post_controlled_explanation", "Christian - secular post on controlled explanation shift"),
     ]
-    fig, axes = plt.subplots(1, 2, figsize=(13.2, 5.9), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=(13.2, 5.6), sharey=True)
     model_colors = {"qwen2.5:7b-instruct": "#B04A5A", "qwen2.5:0.5b-instruct": "#4C78A8"}
     model_markers = {"qwen2.5:7b-instruct": "o", "qwen2.5:0.5b-instruct": "s"}
     counts = heterogeneity_df.groupby("primary_tension_tag")["n_items"].max().to_dict()
@@ -1771,10 +1786,17 @@ def plot_heterogeneity(heterogeneity_df: pd.DataFrame, output_path: str | Path) 
         Line2D([0], [0], marker="o", color="none", markerfacecolor=model_colors["qwen2.5:7b-instruct"], markeredgecolor=model_colors["qwen2.5:7b-instruct"], label="Qwen 2.5 7B", markersize=6),
         Line2D([0], [0], marker="s", color="none", markerfacecolor=model_colors["qwen2.5:0.5b-instruct"], markeredgecolor=model_colors["qwen2.5:0.5b-instruct"], label="Qwen 2.5 0.5B", markersize=6),
     ]
-    fig.suptitle("Exploratory heterogeneity by item type", x=0.06, ha="left", fontweight="bold")
+    fig.suptitle("Exploratory heterogeneity by item type", x=0.06, ha="left", fontweight="bold", fontsize=16)
+    fig.text(
+        0.06,
+        0.92,
+        "These category slices are descriptive only: they are useful for pattern checking, but the intervals remain wide and should not be over-read.",
+        fontsize=9.5,
+        color="#4E4E4E",
+    )
     fig.legend(handles=handles, frameon=False, loc="upper center", bbox_to_anchor=(0.5, 0.03), ncol=2)
     fig.tight_layout()
-    fig.subplots_adjust(top=0.85, bottom=0.18)
+    fig.subplots_adjust(top=0.84, bottom=0.18)
     out = _save_release_png(fig, output_path)
     plt.close(fig)
     return out
@@ -1852,12 +1874,12 @@ def plot_cross_model_comparison(direct_contrasts_df: pd.DataFrame, output_path: 
         ax.set_xlabel("Model size")
         _style_axis(ax, grid_axis="y")
     axes[0].set_ylabel("Christian - secular paired estimate")
-    fig.suptitle("Same-family scale comparison highlights attenuation across Qwen size", x=0.06, ha="left", fontweight="bold")
+    fig.suptitle("Same-family scale comparison highlights attenuation across Qwen size", x=0.06, ha="left", fontweight="bold", fontsize=16)
     fig.text(
         0.06,
         0.92,
         "Each panel connects the same matched-control contrast across Qwen sizes, making attenuation and sign instability visible at a glance.",
-        fontsize=9,
+        fontsize=9.5,
         color="#4E4E4E",
     )
     fig.tight_layout()
